@@ -1,0 +1,67 @@
+{
+  "teryudan": {
+    "scores": {
+      ".read": true,
+      ".indexOn": ["s"],
+      "$uid": {
+        ".write": "auth != null && auth.uid === $uid && newData.exists() && (!data.exists() || (newData.child('s').val() > data.child('s').val() && now - data.child('t').val() > 20000))",
+        ".validate": "newData.hasChildren(['n', 's', 'a', 'p', 'seed', 't', 'v'])",
+        "n": { ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 12" },
+        "s": { ".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() <= 60000" },
+        "a": { ".validate": "newData.isNumber() && newData.val() >= 50 && newData.val() <= 890" },
+        "p": { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 1000" },
+        "seed": { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 4294967295" },
+        "t": { ".validate": "newData.val() === now" },
+        "v": { ".validate": "newData.isNumber()" },
+        "$other": { ".validate": false }
+      }
+    },
+    "day": {
+      "$d": {
+        ".read": true,
+        ".indexOn": ["s"],
+        ".validate": "$d.matches(/^[0-9]{8}$/)",
+        "$uid": {
+          ".write": "auth != null && auth.uid === $uid && newData.exists() && (!data.exists() || (newData.child('s').val() > data.child('s').val() && now - data.child('t').val() > 20000))",
+          ".validate": "newData.hasChildren(['n', 's', 'a', 'p', 'seed', 't', 'v'])",
+          "n": { ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 12" },
+          "s": { ".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() <= 60000" },
+          "a": { ".validate": "newData.isNumber() && newData.val() >= 50 && newData.val() <= 890" },
+          "p": { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 1000" },
+          "seed": { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 4294967295" },
+          "t": { ".validate": "newData.val() === now" },
+          "v": { ".validate": "newData.isNumber()" },
+          "$other": { ".validate": false }
+        }
+      }
+    },
+    "nage": {
+      ".read": true,
+      "$uid": {
+        ".write": "auth != null && auth.uid === $uid && !data.exists() && newData.exists()",
+        ".validate": "newData.hasChildren(['t'])",
+        "t": { ".validate": "newData.val() === now" },
+        "$other": { ".validate": false }
+      }
+    },
+    "dnage": {
+      "$d": {
+        ".read": true,
+        ".validate": "$d.matches(/^[0-9]{8}$/)",
+        "$uid": {
+          ".write": "auth != null && auth.uid === $uid && !data.exists() && newData.exists()",
+          ".validate": "newData.hasChildren(['t'])",
+          "t": { ".validate": "newData.val() === now" },
+          "$other": { ".validate": false }
+        }
+      }
+    },
+    "hidden": {
+      ".read": true,
+      "$uid": {
+        ".write": "auth != null && auth.uid === root.child('furo_admin/uid').val()",
+        ".validate": "newData.val() === true"
+      }
+    }
+  }
+}
