@@ -104,6 +104,7 @@ button:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
 #rpBar button{font:900 16px var(--body);background:rgba(22,24,15,.85);color:var(--paper);border:0;border-radius:999px;padding:10px 22px;cursor:pointer}
 #globe{position:absolute;left:50%;top:calc(env(safe-area-inset-top,0px) + 92px);transform:translateX(-50%);text-align:center;pointer-events:none;color:#fff;font-weight:900;text-shadow:0 1px 3px #000}
 #globe canvas{display:block;margin:0 auto 4px;width:120px;height:120px}
+#rw{position:absolute;left:16px;top:calc(env(safe-area-inset-top,0px) + 80px);font-family:var(--disp);font-size:30px;color:#fff;text-shadow:0 0 6px #0ff,2px 0 #f0f;pointer-events:none;animation:rwb .5s steps(2) infinite}@keyframes rwb{50%{opacity:.3}}
 #flash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none;transition:opacity .5s}
 #loading{position:absolute;inset:0;display:grid;place-items:center;font-weight:900;color:var(--ink)}
 @media (prefers-reduced-motion:reduce){#flash{transition:none}}
@@ -128,6 +129,7 @@ button:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
     <div class="meter" id="powM"><div id="gauge"><div id="gfill"></div></div><span data-i="power">力</span></div>
   </div>
   <div id="flash"></div>
+  <div id="rw" hidden>◀◀ REWIND</div>
 
   <div class="overlay" id="title">
     <div class="sign">
@@ -249,16 +251,16 @@ const TX = {
 };
 /* 死因 */
 const CAUSE = {
-  ja: { feet: '足もとに落とした', head: '真上に投げた', wall: '地面から急に壁が生えてきた', sumo: '力士にはたき返された', dog: '犬が「とってこい」だと思って持ってきた', passerby: '通りすがりの人が親切に投げ返してくれた', batter: '野球少年に打ち返された', tennis: 'テニス部にボレーで返された', keeper: 'ゴールキーパーにパントキックで返された', golfer: 'ゴルファーにナイスショットで返された', trampoline: 'たまたまトランポリンがあった', grandma: 'となりのおばあちゃんが全力で届けてくれた', crow: 'カラスが光り物だと思って持ってきた', wind: '急な向かい風で押しもどされた', ufo: 'UFOにさらわれて、返品された', plane: '旅客機の窓に当たって跳ね返った', boomerang: 'なぜかブーメランの軌道だった', orbit: '地球を一周して背中に帰ってきた', hesitate: '迷っているうちに手の中で爆発した' },
-  en: { feet: 'Dropped it at your feet', head: 'Threw it straight up', wall: 'A wall suddenly grew out of the ground', sumo: 'A sumo wrestler slapped it back', dog: 'A dog thought it was fetch', passerby: 'A kind passerby threw it back', batter: 'A Little Leaguer hit it back', tennis: 'The tennis club volleyed it back', keeper: 'A goalkeeper punted it back', golfer: 'A golfer hit a nice shot back', trampoline: 'There just happened to be a trampoline', grandma: 'Granny next door sprinted it back to you', crow: 'A crow thought it was shiny', wind: 'A sudden headwind pushed it back', ufo: 'A UFO abducted it, then returned it', plane: "It bounced off a jet's window", boomerang: 'It flew like a boomerang for some reason', orbit: 'It circled the Earth and hit you in the back', hesitate: 'Hesitated until it went off in your hand' },
-  zh: { feet: '掉在自己腳邊', head: '往正上方丟', wall: '地面突然長出一面牆', sumo: '被相撲力士一掌拍回來', dog: '狗以為是在玩撿球', passerby: '路人好心丟回來', batter: '被棒球少年打回來', tennis: '被網球社截擊回來', keeper: '被守門員大腳踢回來', golfer: '被高爾夫球手一桿打回來', trampoline: '剛好有一張彈跳床', grandma: '隔壁阿嬤全力送回來', crow: '烏鴉以為是亮晶晶的東西', wind: '突然的逆風把它吹回來', ufo: '被UFO抓走後退貨', plane: '撞到客機窗戶彈回來', boomerang: '不知為何飛成迴力鏢', orbit: '繞地球一圈後打中背後', hesitate: '猶豫太久在手裡爆炸' },
-  ko: { feet: '발밑에 떨어뜨렸다', head: '바로 위로 던졌다', wall: '땅에서 갑자기 벽이 솟아났다', sumo: '스모 선수가 손바닥으로 쳐냈다', dog: '개가 공 가져오기인 줄 알았다', passerby: '지나가던 사람이 친절하게 던져 줬다', batter: '야구 소년이 쳐서 돌려보냈다', tennis: '테니스부가 발리로 돌려보냈다', keeper: '골키퍼가 펀트킥으로 돌려보냈다', golfer: '골퍼가 나이스 샷으로 돌려보냈다', trampoline: '마침 트램펄린이 있었다', grandma: '옆집 할머니가 전력으로 갖다줬다', crow: '까마귀가 반짝이는 건 줄 알았다', wind: '갑자기 맞바람이 불어 밀려왔다', ufo: 'UFO에 납치됐다가 반품됐다', plane: '여객기 창문에 맞고 튕겨 왔다', boomerang: '왠지 부메랑처럼 날아갔다', orbit: '지구를 한 바퀴 돌고 등에 꽂혔다', hesitate: '망설이다가 손안에서 터졌다' },
+  ja: { ambush: '投げた瞬間、野球部が飛び出してきて打ち返された', kite: 'トンビが空中でくわえて、頭の上に落としてくれた', cat: '猫パンチで打ち返された', soccer: 'サッカー部にヘディングで返された', volley: 'バレー部にスパイクで打ち返された', clone: '向こうにもう一人の自分がいて、同じように投げ返してきた', geyser: '落ちたところから急に温泉が噴き出した', mole: 'モグラに吐き出された', scooter: '郵便屋さんがバイクで届けてくれた', magnet: '胸に磁石がついていた', bungee: 'ゴムひもがついていた', feet: '足もとに落とした', head: '真上に投げた', wall: '地面から急に壁が生えてきた', sumo: '力士にはたき返された', dog: '犬が「とってこい」だと思って持ってきた', passerby: '通りすがりの人が親切に投げ返してくれた', batter: '野球少年に打ち返された', tennis: 'テニス部にボレーで返された', keeper: 'ゴールキーパーにパントキックで返された', golfer: 'ゴルファーにナイスショットで返された', trampoline: 'たまたまトランポリンがあった', grandma: 'となりのおばあちゃんが全力で届けてくれた', crow: 'カラスが光り物だと思って持ってきた', wind: '急な向かい風で押しもどされた', ufo: 'UFOにさらわれて、返品された', plane: '旅客機の窓に当たって跳ね返った', boomerang: 'なぜかブーメランの軌道だった', orbit: '地球を一周して背中に帰ってきた', hesitate: '迷っているうちに手の中で爆発した' },
+  en: { ambush: 'A baseball kid jumped out the instant you threw and lined it back', kite: 'A kite (the bird) snatched it midair and dropped it on you', cat: 'A cat swatted it back', soccer: 'A soccer player headed it back', volley: 'The volleyball club spiked it back', clone: 'Another you was waiting there and threw it back the same way', geyser: 'A hot spring suddenly erupted where it landed', mole: 'A mole spat it back out', scooter: 'The mail carrier delivered it back by scooter', magnet: 'You had a magnet on your chest', bungee: 'It was tied to a rubber cord', feet: 'Dropped it at your feet', head: 'Threw it straight up', wall: 'A wall suddenly grew out of the ground', sumo: 'A sumo wrestler slapped it back', dog: 'A dog thought it was fetch', passerby: 'A kind passerby threw it back', batter: 'A Little Leaguer hit it back', tennis: 'The tennis club volleyed it back', keeper: 'A goalkeeper punted it back', golfer: 'A golfer hit a nice shot back', trampoline: 'There just happened to be a trampoline', grandma: 'Granny next door sprinted it back to you', crow: 'A crow thought it was shiny', wind: 'A sudden headwind pushed it back', ufo: 'A UFO abducted it, then returned it', plane: "It bounced off a jet's window", boomerang: 'It flew like a boomerang for some reason', orbit: 'It circled the Earth and hit you in the back', hesitate: 'Hesitated until it went off in your hand' },
+  zh: { ambush: '一丟出去，棒球社就衝出來把它打回來', kite: '老鷹在空中叼走，丟在你頭上', cat: '被貓拳打回來', soccer: '被足球社頭槌頂回來', volley: '被排球社扣殺回來', clone: '對面有另一個自己，用一樣的方式丟回來', geyser: '落地的地方突然噴出溫泉', mole: '被鼴鼠吐了回來', scooter: '郵差騎機車幫你送回來', magnet: '胸口黏著一塊磁鐵', bungee: '綁著橡皮繩', feet: '掉在自己腳邊', head: '往正上方丟', wall: '地面突然長出一面牆', sumo: '被相撲力士一掌拍回來', dog: '狗以為是在玩撿球', passerby: '路人好心丟回來', batter: '被棒球少年打回來', tennis: '被網球社截擊回來', keeper: '被守門員大腳踢回來', golfer: '被高爾夫球手一桿打回來', trampoline: '剛好有一張彈跳床', grandma: '隔壁阿嬤全力送回來', crow: '烏鴉以為是亮晶晶的東西', wind: '突然的逆風把它吹回來', ufo: '被UFO抓走後退貨', plane: '撞到客機窗戶彈回來', boomerang: '不知為何飛成迴力鏢', orbit: '繞地球一圈後打中背後', hesitate: '猶豫太久在手裡爆炸' },
+  ko: { ambush: '던지는 순간 야구부가 튀어나와 쳐서 돌려보냈다', kite: '솔개가 공중에서 물어다 머리 위에 떨어뜨렸다', cat: '고양이 펀치로 되받아쳤다', soccer: '축구부가 헤딩으로 돌려보냈다', volley: '배구부가 스파이크로 돌려보냈다', clone: '저쪽에 또 다른 내가 있어서 똑같이 던져 돌려보냈다', geyser: '떨어진 곳에서 갑자기 온천이 솟구쳤다', mole: '두더지가 뱉어냈다', scooter: '우체부가 오토바이로 배달해 줬다', magnet: '가슴에 자석이 붙어 있었다', bungee: '고무줄이 달려 있었다', feet: '발밑에 떨어뜨렸다', head: '바로 위로 던졌다', wall: '땅에서 갑자기 벽이 솟아났다', sumo: '스모 선수가 손바닥으로 쳐냈다', dog: '개가 공 가져오기인 줄 알았다', passerby: '지나가던 사람이 친절하게 던져 줬다', batter: '야구 소년이 쳐서 돌려보냈다', tennis: '테니스부가 발리로 돌려보냈다', keeper: '골키퍼가 펀트킥으로 돌려보냈다', golfer: '골퍼가 나이스 샷으로 돌려보냈다', trampoline: '마침 트램펄린이 있었다', grandma: '옆집 할머니가 전력으로 갖다줬다', crow: '까마귀가 반짝이는 건 줄 알았다', wind: '갑자기 맞바람이 불어 밀려왔다', ufo: 'UFO에 납치됐다가 반품됐다', plane: '여객기 창문에 맞고 튕겨 왔다', boomerang: '왠지 부메랑처럼 날아갔다', orbit: '지구를 한 바퀴 돌고 등에 꽂혔다', hesitate: '망설이다가 손안에서 터졌다' },
 };
 const BUB = {
-  ja: { dog: 'ワン！', passerby: '落としましたよ', batter: 'カキーン', tennis: 'ポーン', keeper: 'セーブ！', golfer: 'ナイスショット', grandma: 'これ、あんたの？', sumo: 'どすこい', ufo: '返品します', ufo1: 'ピロピロピロ', plane: 'ゴン', crow: 'カァ', wind: 'ビュオオオ', wall: 'ズゴゴゴ', trampoline: 'ボヨーン' },
-  en: { dog: 'Woof!', passerby: 'You dropped this!', batter: 'CRACK!', tennis: 'POCK!', keeper: 'SAVE!', golfer: 'Nice shot!', grandma: 'Is this yours, dear?', sumo: 'Dosukoi!', ufo: 'Return to sender', ufo1: 'Beep boop', plane: 'BONK', crow: 'Caw!', wind: 'WHOOSH', wall: 'RUMBLE', trampoline: 'BOING' },
-  zh: { dog: '汪！', passerby: '你東西掉了', batter: '鏘！', tennis: '啪！', keeper: '撲救！', golfer: '好球！', grandma: '這是你的嗎？', sumo: '嘿咻！', ufo: '退貨', ufo1: '嗶嗶嗶', plane: '咚', crow: '嘎', wind: '呼～～', wall: '轟隆隆', trampoline: '啵嚶～' },
-  ko: { dog: '멍!', passerby: '떨어뜨리셨어요', batter: '딱!', tennis: '퐁!', keeper: '선방!', golfer: '나이스 샷!', grandma: '이거 네 거니?', sumo: '돗스코이!', ufo: '반품합니다', ufo1: '삐리삐리', plane: '쾅', crow: '까악', wind: '휘이잉', wall: '우르릉', trampoline: '뿅~' },
+  ja: { ambush: 'ちょっと待ったぁ！', kite: 'ピーヒョロロ', cat: 'ニャッ', soccer: 'ヘディング！', volley: 'スパイク！', clone: '……', geyser: 'ブシャーッ', mole: 'ぺっ', scooter: 'お届けものです', magnet: 'ピタッ', bungee: 'ビヨーン', dog: 'ワン！', passerby: '落としましたよ', batter: 'カキーン', tennis: 'ポーン', keeper: 'セーブ！', golfer: 'ナイスショット', grandma: 'これ、あんたの？', sumo: 'どすこい', ufo: '返品します', ufo1: 'ピロピロピロ', plane: 'ゴン', crow: 'カァ', wind: 'ビュオオオ', wall: 'ズゴゴゴ', trampoline: 'ボヨーン' },
+  en: { ambush: 'Hold it right there!', kite: 'Pee-yoo!', cat: 'Mew!', soccer: 'HEADER!', volley: 'SPIKE!', clone: '……', geyser: 'WHOOSH', mole: 'Ptoo', scooter: 'Special delivery!', magnet: 'CLINK', bungee: 'BOINNG', dog: 'Woof!', passerby: 'You dropped this!', batter: 'CRACK!', tennis: 'POCK!', keeper: 'SAVE!', golfer: 'Nice shot!', grandma: 'Is this yours, dear?', sumo: 'Dosukoi!', ufo: 'Return to sender', ufo1: 'Beep boop', plane: 'BONK', crow: 'Caw!', wind: 'WHOOSH', wall: 'RUMBLE', trampoline: 'BOING' },
+  zh: { ambush: '等一下！', kite: '咻～嗚', cat: '喵！', soccer: '頭槌！', volley: '扣殺！', clone: '……', geyser: '噗咻——', mole: '呸', scooter: '您的包裹', magnet: '啪嗒', bungee: '啵嗯～', dog: '汪！', passerby: '你東西掉了', batter: '鏘！', tennis: '啪！', keeper: '撲救！', golfer: '好球！', grandma: '這是你的嗎？', sumo: '嘿咻！', ufo: '退貨', ufo1: '嗶嗶嗶', plane: '咚', crow: '嘎', wind: '呼～～', wall: '轟隆隆', trampoline: '啵嚶～' },
+  ko: { ambush: '잠깐 기다려!', kite: '삐요로롱', cat: '냥!', soccer: '헤딩!', volley: '스파이크!', clone: '……', geyser: '푸슈욱', mole: '퉤', scooter: '배달 왔습니다', magnet: '착', bungee: '뾰옹', dog: '멍!', passerby: '떨어뜨리셨어요', batter: '딱!', tennis: '퐁!', keeper: '선방!', golfer: '나이스 샷!', grandma: '이거 네 거니?', sumo: '돗스코이!', ufo: '반품합니다', ufo1: '삐리삐리', plane: '쾅', crow: '까악', wind: '휘이잉', wall: '우르릉', trampoline: '뿅~' },
 };
 function pickLang() {
   const saved = (() => { try { return JSON.parse(localStorage.getItem('tk_lang')); } catch (_) { return null; } })();
@@ -283,11 +285,212 @@ function lsGet(k) { try { return JSON.parse(localStorage.getItem(k)); } catch (_
 function lsSet(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (_) { } }
 
 /* ===================== 投げた結果の計算（再生・検算と共通） ===================== */
-const VER = 1, DEG = Math.PI / 180, GR = 9.8, RX = -0.32, RY = 1.95, RZ = 0.3;
+/* ===================== 帰ってくる理由の一覧（型 × 登場するもの） =====================
+   [名前, 型, 出る場所, 登場するもの, 数値, 日本語「死因|吹き出し」, 英語, 繁体字, 韓国語]
+   出る場所: a=低い角度で近い b=低い角度で遠い c=ふつうの角度で近い d=ふつうの角度で中くらい e=ふつうの角度で遠い h=高い角度 */
+const CAT = [
+  // ---- 打ち返す
+  ['kendo', 'hit', 'cde', { p: { prop: 'shinai', c: 0x1d2a5a } }, { h: 1.7, spd: 26, st: 'over', snd: 'bat' }, '剣道部に面で打ち返された|メーン！', 'The kendo club struck it back|MEN!', '被劍道社一記面擊打回來|面！', '검도부가 머리치기로 돌려보냈다|머리!'],
+  ['badminton', 'hit', 'cdeh', { p: { prop: 'sracket', c: 0xf0f0f0 } }, { h: 2.4, spd: 30, st: 'over', snd: 'pock' }, 'バドミントン部にスマッシュで返された|スマッシュ！', 'The badminton club smashed it back|SMASH!', '被羽球社殺球打回來|殺球！', '배드민턴부가 스매시로 돌려보냈다|스매시!'],
+  ['pingpong', 'hit', 'acd', { p: { prop: 'paddle', s: .9 } }, { h: 1.0, spd: 28, st: 'bat', snd: 'pock' }, '卓球部にスマッシュで返された|サァー！', 'The table tennis club smashed it back|CHOLE!', '被桌球社扣殺回來|好球！', '탁구부가 스매시로 돌려보냈다|짜오!'],
+  ['cricket', 'hit', 'bde', { p: { prop: 'cbat', cap: 0xf0f0e0 } }, { h: .8, spd: 30, st: 'bat', snd: 'bat' }, 'クリケット選手に打ち返された|ハウザット！', 'A cricketer hit it back|Howzat!', '被板球選手打回來|好球！', '크리켓 선수가 쳐서 돌려보냈다|하우잿!'],
+  ['hockey', 'hit', 'abcd', { p: { prop: 'hstick', cap: 0x2050c0 } }, { h: .3, spd: 32, st: 'low', snd: 'bat' }, 'ホッケー選手にスラップショットで返された|スラップショット！', 'A hockey player slapshot it back|SLAPSHOT!', '被冰球選手大力擊回來|拍射！', '하키 선수가 슬랩샷으로 돌려보냈다|슬랩샷!'],
+  ['chef', 'hit', 'acd', { p: { prop: 'pan', cap: 0xffffff } }, { h: 1.2, spd: 22, st: 'bat', snd: 'gong' }, '中華料理屋の店主にフライパンで打ち返された|へいっ！', 'A Chinese restaurant chef hit it back with a wok|Hiya!', '被中餐館老闆用炒鍋打回來|嘿！', '중국집 사장님이 프라이팬으로 쳐냈다|헤이!'],
+  ['mom', 'hit', 'ac', { p: { prop: 'swatter', bun: 1 } }, { h: 1.3, spd: 20, st: 'over', snd: 'slap' }, 'お母さんにハエたたきで叩き返された|もうっ！', 'Mom swatted it back with a fly swatter|Honestly!', '被老媽用蒼蠅拍打回來|真是的！', '엄마가 파리채로 때려 돌려보냈다|아휴!'],
+  ['grandpa', 'hit', 'acd', { p: { prop: 'umbrella', s: .95 } }, { h: 1.2, spd: 18, st: 'bat', snd: 'pock' }, 'おじいちゃんに傘で打ち返された|ほいっ', 'Grandpa hit it back with his umbrella|Hup!', '被阿公用雨傘打回來|嘿咻', '할아버지가 우산으로 쳐냈다|에잇'],
+  ['rocker', 'hit', 'cd', { p: { prop: 'guitar', c: 0x2a2a2e } }, { h: 1.3, spd: 24, st: 'bat', snd: 'guitar' }, 'ロッカーにギターで打ち返された|イェーイ！', 'A rocker smashed it back with a guitar|YEAH!', '被搖滾樂手用吉他打回來|耶！', '로커가 기타로 쳐냈다|예이!'],
+  ['sweeper', 'hit', 'abc', { p: { prop: 'broom', bun: 1 } }, { h: .3, spd: 16, st: 'low', snd: 'swish' }, '掃除のおばちゃんにほうきで掃き返された|はいはい', 'The janitor swept it back|There we go', '被清潔阿姨用掃把掃回來|好啦好啦', '청소 아주머니가 빗자루로 쓸어 보냈다|네네'],
+  ['baker', 'hit', 'cd', { p: { prop: 'baguette', cap: 0xffffff } }, { h: 1.2, spd: 20, st: 'bat', snd: 'pock' }, 'パン屋さんにバゲットで打ち返された|ボンジュール', 'A baker hit it back with a baguette|Bonjour', '被麵包師傅用法棍打回來|Bonjour', '빵집 사장님이 바게트로 쳐냈다|봉주르'],
+  ['carpenter', 'hit', 'acd', { p: { prop: 'hammer', cap: 0xf0c020 } }, { h: 1.1, spd: 22, st: 'over', snd: 'clang' }, '大工さんにトンカチで打ち返された|トンッ', 'A carpenter hammered it back|TONK', '被木匠用鐵鎚敲回來|咚', '목수가 망치로 쳐냈다|땅'],
+  ['samurai', 'hit', 'bde', { p: { prop: 'katana', c: 0x3a3a4a } }, { h: 1.4, spd: 30, st: 'bat', snd: 'clang' }, '侍に刀で弾き返された|御免！', 'A samurai deflected it with his sword|Pardon me!', '被武士用刀彈回來|失禮了！', '사무라이가 칼로 튕겨냈다|실례!'],
+  ['festival', 'hit', 'cd', { p: { prop: 'uchiwa' } }, { h: 1.3, spd: 12, st: 'bat', snd: 'swish' }, '夏祭りの人にうちわであおぎ返された|わっしょい', 'A festival-goer fanned it back|Wasshoi!', '被夏日祭典的人用扇子搧回來|嘿呦', '여름 축제 손님이 부채로 부쳐 돌려보냈다|왓쇼이'],
+  ['skater', 'hit', 'bd', { p: { prop: 'skate', cap: 0x30a050 } }, { h: .7, spd: 24, st: 'bat', snd: 'clack' }, 'スケボー少年にデッキで弾き返された|イェア', 'A skater kid deflected it with his deck|Yeah', '被滑板少年用滑板彈回來|耶', '스케이트보드 소년이 보드로 튕겨냈다|예아'],
+  ['surfer', 'hit', 'de', { p: { prop: 'surf' } }, { h: 1.3, spd: 20, st: 'bat', snd: 'thud' }, 'サーファーにボードで弾き返された|アロハ', 'A surfer bounced it back with his board|Aloha', '被衝浪客用衝浪板彈回來|Aloha', '서퍼가 서핑보드로 튕겨냈다|알로하'],
+  ['conductor', 'hit', 'cd', { p: { prop: 'baton', c: 0x202024 } }, { h: 1.6, spd: 18, st: 'over', snd: 'ting' }, '指揮者にタクトで打ち返された|ブラボー', 'A conductor batted it back with his baton|Bravo', '被指揮家用指揮棒打回來|Bravo', '지휘자가 지휘봉으로 쳐냈다|브라보'],
+  ['teacher', 'hit', 'acd', { p: { prop: 'pointer' } }, { h: 1.5, spd: 18, st: 'over', snd: 'ting' }, '先生に指し棒で打ち返された|静かに！', 'A teacher swatted it back with a pointer|Quiet!', '被老師用教鞭打回來|安靜！', '선생님이 지시봉으로 쳐냈다|조용!'],
+  ['kungfu', 'hit', 'acd', { p: { c: 0xd8c040 } }, { h: 1.5, spd: 28, st: 'kick', snd: 'thud' }, 'カンフーの達人に回し蹴りで返された|アチョー！', 'A kung fu master roundhouse-kicked it back|HWAAA!', '被功夫高手迴旋踢回來|喝啊！', '쿵후 고수가 돌려차기로 돌려보냈다|아쵸!'],
+  ['karate', 'hit', 'ac', { p: { c: 0xf6f6f2, belt: 0x202020 } }, { h: 1.2, spd: 26, st: 'punch', snd: 'thud' }, '空手家に正拳突きで返された|押忍！', 'A karateka punched it back|OSU!', '被空手家正拳打回來|押忍！', '가라테 고수가 정권 지르기로 돌려보냈다|오스!'],
+  ['boxer', 'hit', 'ac', { p: { handC: 0xd02020, handScale: 2.2 } }, { h: 1.4, spd: 26, st: 'punch', snd: 'thud' }, 'ボクサーにストレートで返された|シュッ', 'A boxer straight-punched it back|JAB', '被拳擊手直拳打回來|咻', '복서가 스트레이트로 돌려보냈다|슉'],
+  ['rugby', 'hit', 'de', { p: { cap: 0x208040, w: 1.2 } }, { h: .6, spd: 30, st: 'kick', snd: 'thud' }, 'ラグビー部にキックで返された|ナイスキック', 'The rugby club kicked it back|Nice kick', '被橄欖球社踢回來|好球', '럭비부가 킥으로 돌려보냈다|나이스 킥'],
+  ['ballerina', 'hit', 'cd', { p: { c: 0xf2c0d0, s: .95, bun: 1 } }, { h: 1.6, spd: 20, st: 'kick', snd: 'ting' }, 'バレリーナにつま先で蹴り返された|アン・ドゥ・トロワ', 'A ballerina pointe-kicked it back|Un, deux, trois', '被芭蕾舞者用腳尖踢回來|一、二、三', '발레리나가 발끝으로 차서 돌려보냈다|앙, 되, 트루아'],
+  ['taekwondo', 'hit', 'cde', { p: { c: 0xf6f6f2, belt: 0x202020 } }, { h: 1.9, spd: 28, st: 'kick', snd: 'thud' }, 'テコンドー選手にかかと落としで返された|ヤッ！', 'A taekwondo fighter axe-kicked it back|HYAH!', '被跆拳道選手下劈踢回來|呀！', '태권도 선수가 내려찍기로 돌려보냈다|얍!'],
+  ['negi', 'hit', 'acd', { p: { prop: 'negi', bun: 1 } }, { h: 1.2, spd: 16, st: 'bat', snd: 'swish' }, '買い物帰りの主婦にネギで打ち返された|あらやだ', 'A shopper whacked it back with a leek|Oh my', '被買菜回家的主婦用蔥打回來|哎呀', '장 보고 오던 주부가 대파로 쳐냈다|어머'],
+  ['fishmonger', 'hit', 'cd', { p: { prop: 'tuna', cap: 0xffffff } }, { h: 1.1, spd: 18, st: 'bat', snd: 'slap' }, '魚屋さんにマグロで打ち返された|らっしゃい！', 'A fishmonger whacked it back with a tuna|Welcome!', '被魚販用鮪魚打回來|歡迎光臨！', '생선가게 사장님이 참치로 쳐냈다|어서 옵쇼!'],
+  ['wrestler', 'hit', 'acd', { p: { c: 0x2a2a2e, w: 1.4 } }, { h: 1.5, spd: 24, st: 'slap', snd: 'slap' }, 'プロレスラーにラリアットで返された|ウィー！', 'A pro wrestler clotheslined it back|WOOO!', '被職業摔角手金臂勾回來|喔——！', '프로레슬러가 래리어트로 돌려보냈다|위이!'],
+  // ---- 受けとめて投げ返す
+  ['dodgeball', 'catch', 'acd', { p: { s: .75, cap: 0xf06020 } }, { h: 1.0, hold: .6, spd: 20, st: 'throw' }, 'ドッジボールの子にキャッチされて当て返された|アウト！', "A dodgeball kid caught it and fired back|You're out!", '被躲避球小孩接住又丟回來|出局！', '피구하는 아이가 잡아서 되던졌다|아웃!'],
+  ['pitcher', 'catch', 'bde', { p: { cap: 0x1d2a5a, handC: 0x8b5a2b } }, { h: 1.2, hold: 1.0, spd: 43, st: 'throw', snd: 'whoosh' }, 'ピッチャーに捕られて剛速球で返された|155km/h', 'A pitcher caught it and fired a fastball back|97 mph', '被投手接住後用快速球丟回來|155km/h', '투수가 잡아서 강속구로 돌려보냈다|155km/h'],
+  ['qb', 'catch', 'de', { p: { w: 1.25, cap: 0x902020 } }, { h: 1.6, hold: .9, spd: 26, st: 'throw' }, 'アメフトのQBにロングパスで返された|タッチダウン！', 'A quarterback launched a long pass back|TOUCHDOWN!', '被美式足球四分衛長傳回來|達陣！', '쿼터백이 롱패스로 돌려보냈다|터치다운!'],
+  ['basketball', 'catch', 'cd', { p: { s: 1.1 } }, { h: 1.9, hold: 1.4, spd: 18, st: 'throw', spin: 1 }, 'バスケ部に指でくるくる回されてからパスされた|ナイスパス', 'A basketball player spun it on a finger, then passed it back|Nice pass', '被籃球社用手指轉一轉再傳回來|好傳球', '농구부가 손가락으로 돌리다가 패스했다|나이스 패스'],
+  ['shotput', 'catch', 'cd', { p: { w: 1.45 } }, { h: 1.2, hold: 1.5, spd: 12, st: 'put', snd: 'grunt' }, '砲丸投げの選手に投げ返された|うおおお', 'A shot putter heaved it back|HNNNGH', '被鉛球選手擲回來|喝啊啊', '포환던지기 선수가 던져 돌려보냈다|으아아'],
+  ['handball', 'catch', 'cd', { p: { cap: 0x2060d0 } }, { h: 1.8, hold: .5, spd: 28, st: 'throw' }, 'ハンドボール部にジャンプシュートで返された|シュート！', 'The handball club jump-shot it back|SHOT!', '被手球社跳投回來|射門！', '핸드볼부가 점프슛으로 돌려보냈다|슛!'],
+  ['juggler', 'catch', 'cd', { p: { cap: 0xd03070 } }, { h: 1.3, hold: 2.2, spd: 16, st: 'throw', spin: 1 }, '大道芸人にジャグリングされてから返された|ハイ、拍手！', 'A street performer juggled it, then tossed it back|Applause, please!', '被街頭藝人雜耍一番後丟回來|請鼓掌！', '거리 공연자가 저글링하다가 돌려보냈다|박수!'],
+  ['lacrosse', 'catch', 'cd', { p: { prop: 'lax', cap: 0xf0f0f0 } }, { h: 1.6, hold: .6, spd: 26, st: 'throw' }, 'ラクロス部にクロスでキャッチされて返された|ナイスキャッチ', 'The lacrosse club caught it in a stick and fired it back|Nice catch', '被長曲棍球社用球桿接住丟回來|好接！', '라크로스부가 스틱으로 잡아 돌려보냈다|나이스 캐치'],
+  ['pillow', 'catch', 'acd', { p: { s: .8, prop: 'pillow' } }, { h: 1.1, hold: .7, spd: 14, st: 'throw' }, '修学旅行の中学生に枕投げの要領で返された|先生来た！', "Kids on a school trip returned it pillow-fight style|Teacher's coming!", '被畢業旅行的國中生當枕頭丟回來|老師來了！', '수학여행 온 중학생이 베개싸움처럼 돌려보냈다|선생님 온다!'],
+  ['catcher', 'catch', 'bd', { p: { cap: 0x1d2a5a, handC: 0x8b5a2b, handScale: 2 } }, { h: .9, hold: .6, spd: 36, st: 'throw' }, 'キャッチャーに捕られて二塁送球のように返された|走った！', "A catcher threw it back like nailing a base stealer|He's running!", '被捕手接住，像傳二壘一樣丟回來|盜壘！', '포수가 2루 송구처럼 돌려보냈다|뛴다!'],
+  ['dad', 'catch', 'acd', { p: { cap: 0x3a5a8a } }, { h: 1.4, hold: .7, spd: 18, st: 'throw' }, 'キャッチボール中のお父さんに返された|いい球だ', 'A dad playing catch threw it back|Good arm!', '在玩傳接球的爸爸丟回來|好球', '캐치볼 하던 아빠가 돌려보냈다|좋은 공이다'],
+  ['waiter', 'catch', 'cd', { p: { c: 0x202024, prop: 'tray' } }, { h: 1.3, hold: 1.0, spd: 14, st: 'throw' }, 'ウェイターにお盆で受け止められて返された|お待たせしました', 'A waiter caught it on a tray and served it back|Your order', '被服務生用托盤接住送回來|讓您久等了', '웨이터가 쟁반으로 받아 돌려보냈다|주문하신 거 나왔습니다'],
+  ['clown', 'catch', 'cd', { p: { c: 0xf0f0f0, cap: 0xe03030 } }, { h: 1.3, hold: 1.6, spd: 15, st: 'throw', spin: 1 }, 'ピエロに受け止められて、くるくる回してから返された|ハッハッハ', 'A clown caught it, twirled it, and tossed it back|Ha ha ha', '被小丑接住轉了幾圈再丟回來|哈哈哈', '피에로가 받아서 빙글빙글 돌리다 돌려보냈다|하하하'],
+  // ---- 拾って投げ返す
+  ['monkey', 'pick', 'acd', { p: { c: 0x8a5a30, s: .6 } }, { hold: 1.0, spd: 18, st: 'throw' }, 'サルにひろわれて投げ返された|キキッ', 'A monkey picked it up and threw it back|Eek eek!', '被猴子撿起來丟回來|吱吱', '원숭이가 주워서 던져 돌려보냈다|끽끽'],
+  ['gorilla', 'pick', 'cde', { p: { c: 0x2a2a2c, w: 1.7, s: 1.2 } }, { hold: 1.4, spd: 24, st: 'throw', snd: 'thud' }, 'ゴリラに投げ返された|ウホ', 'A gorilla hurled it back|Ooh ooh', '被大猩猩丟回來|吼', '고릴라가 던져 돌려보냈다|우호'],
+  ['kid', 'pick', 'ac', { p: { s: .7, cap: 0xf0d020 } }, { hold: 1.2, spd: 12, st: 'throw' }, '近所の子どもに「おとしたよー」と投げ返された|おとしたよー', 'A neighborhood kid threw it back|You dropped this!', '被附近的小孩丟回來|你掉東西了～', '동네 아이가 던져 돌려보냈다|떨어뜨렸어요~'],
+  ['worker', 'pick', 'cd', { p: { cap: 0xf0c020 } }, { hold: 1.1, spd: 18, st: 'throw' }, '工事現場の人に「危ないよ」と投げ返された|危ないよ', 'A construction worker tossed it back|Careful there', '被工地工人丟回來說「危險喔」|危險喔', '공사장 아저씨가 던져 돌려보냈다|위험해요'],
+  ['ninja', 'pick', 'cde', { p: { c: 0x1a1a22 } }, { hold: .6, spd: 32, st: 'throw', snd: 'whoosh' }, '忍者に手裏剣のように投げ返された|ニンニン', 'A ninja threw it back like a shuriken|Nin nin', '被忍者像手裡劍一樣丟回來|忍忍', '닌자가 수리검처럼 던져 돌려보냈다|닌닌'],
+  ['robot', 'pick', 'cde', { p: { c: 0xa0a8b0 } }, { hold: 1.5, spd: 20, st: 'throw', snd: 'beep' }, 'ロボットに「返却シマス」と投げ返された|返却シマス', 'A robot returned it|RETURNING ITEM', '被機器人丟回來說「歸還」|歸還中', '로봇이 던져 돌려보냈다|반납합니다'],
+  ['cleaner', 'pick', 'cd', { p: { cap: 0x3080d0 } }, { hold: 1.4, spd: 16, st: 'throw' }, '清掃員に「燃えないゴミです」と投げ返された|これ燃えないゴミ', "A street cleaner threw it back: not burnable trash|Not burnable!", '被清潔員丟回來說是不可燃垃圾|這是不可燃垃圾', '환경미화원이 불연성 쓰레기라며 던져 돌려보냈다|이건 불연성'],
+  ['alien', 'pick', 'de', { p: { c: 0x80d070 } }, { hold: 1.3, spd: 22, st: 'throw', snd: 'beep' }, '宇宙人に投げ返された|ワレワレハ', 'An alien threw it back|WE COME IN PEACE', '被外星人丟回來|我們是外星人', '외계인이 던져 돌려보냈다|우리는'],
+  ['elephant', 'pick', 'de', { q: 'elephant' }, { hold: 1.4, spd: 20, st: 'trunk', snd: 'trumpet' }, '象に鼻で投げ返された|パオーン', 'An elephant flung it back with its trunk|PAWOOO', '被大象用鼻子甩回來|叭嗚～', '코끼리가 코로 던져 돌려보냈다|뿌우우'],
+  ['giraffe', 'pick', 'de', { q: 'giraffe' }, { hold: 1.4, spd: 18, st: 'toss' }, 'キリンに首をしならせて投げ返された|（キリンは鳴かない）', "A giraffe flung it back with its neck|(giraffes don't talk)", '被長頸鹿甩脖子丟回來|（長頸鹿不會叫）', '기린이 목을 휘둘러 던져 돌려보냈다|(기린은 안 운다)'],
+  ['fisherman', 'pick', 'cde', { p: { prop: 'rod', cap: 0x406030 } }, { hold: 1.6, spd: 20, st: 'over' }, '釣り人に釣り上げられて投げ返された|大物だ！', 'An angler hooked it and cast it back|Big one!', '被釣客釣起來甩回來|大魚！', '낚시꾼이 낚아 올려 던져 돌려보냈다|월척이다!'],
+  ['zombie', 'pick', 'cd', { p: { c: 0x7a9a70 } }, { hold: 2.0, spd: 12, st: 'throw', snd: 'groan' }, 'ゾンビに投げ返された|ア゛ー', 'A zombie threw it back|Uuuugh', '被殭屍丟回來|啊——', '좀비가 던져 돌려보냈다|으어어'],
+  ['santa', 'pick', 'de', { p: { c: 0xc83030, cap: 0xc83030, w: 1.4 } }, { hold: 1.4, spd: 18, st: 'throw', snd: 'bell' }, 'サンタクロースにプレゼントとして投げ返された|メリークリスマス', 'Santa returned it as a present|Merry Christmas', '被聖誕老人當禮物丟回來|聖誕快樂', '산타가 선물로 던져 돌려보냈다|메리 크리스마스'],
+  ['bride', 'pick', 'cd', { p: { c: 0xffffff, bun: 1 } }, { hold: 1.2, spd: 16, st: 'over' }, '花嫁にブーケトスで投げ返された|次はあなたよ', "A bride tossed it back like a bouquet|You're next!", '被新娘當捧花丟回來|下一個就是你', '신부가 부케처럼 던져 돌려보냈다|다음은 너야'],
+  ['gardener', 'pick', 'cd', { p: { cap: 0x6a8a30 } }, { hold: 1.2, spd: 16, st: 'throw' }, '庭師に「うちの庭に投げないで」と投げ返された|うちの庭はダメ', 'A gardener threw it back out of his garden|Not in my garden', '被園丁丟回來|不要丟我的院子', '정원사가 던져 돌려보냈다|우리 정원은 안 돼'],
+  ['miko', 'pick', 'cd', { p: { c: 0xf6f6f2, bun: 1 } }, { hold: 2.0, spd: 14, st: 'over', snd: 'bell' }, '神社の巫女さんにお祓いされてから返された|はらいたまえ', 'A shrine maiden purified it, then threw it back|Begone, evil', '被神社巫女驅邪後丟回來|驅邪～', '신사 무녀가 액막이를 하고 돌려보냈다|물러가라'],
+  ['detective', 'pick', 'cde', { p: { c: 0x8a7a5a } }, { hold: 1.2, spd: 18, st: 'throw' }, '刑事に「証拠品だ」と投げ返された|証拠品だ', "A detective threw it back: it's evidence|That's evidence", '被刑警說「這是證物」丟回來|這是證物', '형사가 증거품이라며 던져 돌려보냈다|증거품이다'],
+  // ---- ぶつかって跳ね返る
+  ['mime', 'bounce', 'bcd', { p: { c: 0xf6f6f6 } }, { h: 1.3, spd: 22, mode: 'static', st: 'push', snd: 'boing' }, 'パントマイムの人の見えない壁で跳ね返った|（無言）', "Bounced off a mime's invisible wall|(silence)", '撞到默劇演員的隱形牆彈回來|（無聲）', '마임 아티스트의 보이지 않는 벽에 튕겼다|(무언)'],
+  ['scarecrow', 'bounce', 'abcd', { x: 'scarecrow' }, { h: 1.4, spd: 18, mode: 'static' }, 'かかしに当たって跳ね返った|……', 'Bounced off a scarecrow|...', '撞到稻草人彈回來|……', '허수아비에 맞고 튕겼다|……'],
+  ['statue', 'bounce', 'bcd', { x: 'statue' }, { h: 1.4, spd: 18, mode: 'static', snd: 'clang' }, '本を読む少年の銅像に当たって跳ね返った|カーン', 'Bounced off a statue of a boy reading|CLANG', '撞到看書少年的銅像彈回來|鏗', '책 읽는 소년 동상에 튕겼다|깡'],
+  ['vending', 'bounce', 'abcd', { x: 'vending' }, { h: 1.3, spd: 18, mode: 'static', snd: 'clang' }, '自販機に当たって跳ね返った|ガコン', 'Bounced off a vending machine|CLUNK', '撞到自動販賣機彈回來|匡噹', '자판기에 맞고 튕겼다|덜컹'],
+  ['postbox', 'bounce', 'abc', { x: 'postbox' }, { h: 1.0, spd: 16, mode: 'static', snd: 'clang' }, 'ポストに当たって跳ね返った|ゴン', 'Bounced off a mailbox|BONK', '撞到郵筒彈回來|咚', '우체통에 맞고 튕겼다|쿵'],
+  ['pole', 'bounce', 'bd', { x: 'pole' }, { h: 2.0, spd: 20, mode: 'static', snd: 'clang' }, '電柱に当たって跳ね返った|カーン', 'Bounced off a utility pole|CLANG', '撞到電線桿彈回來|鏗', '전봇대에 맞고 튕겼다|깡'],
+  ['car', 'bounce', 'bd', { v: { k: 'car', c: 0x3070c0 } }, { h: 1.2, spd: 24, mode: 'slide', snd: 'honk' }, '通りがかった車のフロントガラスで跳ね返った|プップー', "Bounced off a passing car's windshield|HONK", '撞到路過汽車的擋風玻璃彈回來|叭叭', '지나가던 차 앞유리에 튕겼다|빵빵'],
+  ['bus', 'bounce', 'bde', { v: { k: 'bus', c: 0x30a060 } }, { h: 1.6, spd: 22, mode: 'slide', snd: 'bonk' }, '路線バスの横っ腹で跳ね返った|発車しまーす', 'Bounced off the side of a city bus|Departing!', '撞到公車側面彈回來|發車了～', '시내버스 옆면에 튕겼다|출발합니다'],
+  ['truck', 'bounce', 'bde', { v: { k: 'truck', c: 0xe8e8e8 } }, { h: 1.6, spd: 22, mode: 'slide', snd: 'bonk' }, '引っ越しトラックの荷台で跳ね返った|オーライ', 'Bounced off a moving truck|Back it up!', '撞到搬家卡車車斗彈回來|倒車～', '이삿짐 트럭 짐칸에 튕겼다|오라이'],
+  ['train', 'bounce', 'de', { v: { k: 'train', c: 0xe0e0d0 } }, { h: 1.8, spd: 26, mode: 'slide', snd: 'bonk' }, 'なぜか横切った電車に当たって跳ね返った|ガタンゴトン', 'Bounced off a train that somehow crossed the road|Clickety-clack', '撞到不知為何橫越的電車彈回來|喀噹喀噹', '왠지 지나간 전철에 튕겼다|덜컹덜컹'],
+  ['riot', 'bounce', 'bcd', { p: { prop: 'shield', c: 0x2a3a5a } }, { h: 1.2, spd: 22, mode: 'static', st: 'push', snd: 'clang' }, '機動隊の盾で跳ね返された|下がって！', 'Bounced off a riot shield|Stand back!', '被鎮暴警察的盾牌彈回來|退後！', '기동대 방패에 튕겼다|물러서!'],
+  ['gong', 'bounce', 'cd', { x: 'gong' }, { h: 1.4, spd: 20, mode: 'static', snd: 'gong' }, '銅鑼に当たって跳ね返った|ジャーン', 'Bounced off a gong|GONNNG', '撞到銅鑼彈回來|鏘——', '징에 맞고 튕겼다|지잉'],
+  ['bell', 'bounce', 'de', { x: 'bell' }, { h: 1.9, spd: 20, mode: 'static', snd: 'bell' }, 'お寺の鐘に当たって跳ね返った|ゴーン', 'Bounced off a temple bell|BONNNG', '撞到寺廟的鐘彈回來|噹——', '절의 종에 맞고 튕겼다|데엥'],
+  ['mirror', 'bounce', 'bd', { x: 'mirror' }, { h: 1.5, spd: 26, mode: 'rise', snd: 'ting' }, '地面からせり上がってきた巨大な鏡に反射した|キラーン', 'Reflected off a giant mirror that rose up|SHING', '被從地面升起的巨大鏡子反射回來|閃', '땅에서 솟은 거대한 거울에 반사됐다|반짝'],
+  ['spring', 'bounce', 'abcd', { x: 'spring' }, { h: .8, spd: 16, mode: 'rise', snd: 'boing' }, '地面からバネが飛び出してきた|ビヨヨーン', 'A spring popped out of the ground|BOYOYOING', '地面彈出一根彈簧|啵嚶嚶', '땅에서 스프링이 튀어나왔다|뾰요용'],
+  ['bouncy', 'bounce', 'cd', { x: 'bouncy' }, { h: .9, spd: 14, mode: 'static', snd: 'boing' }, 'ふわふわ遊具で跳ね返った|ぼよん', 'Bounced off a bouncy castle|BOING', '撞到充氣城堡彈回來|啵～', '에어바운스에 튕겼다|뿅'],
+  ['jelly', 'bounce', 'cd', { x: 'jelly' }, { h: 1.2, spd: 14, mode: 'drop', snd: 'boing' }, '空から巨大なプリンが落ちてきて跳ね返った|ぷるん', 'A giant pudding fell from the sky and bounced it back|Jiggle', '天上掉下巨大布丁把它彈回來|Q彈', '하늘에서 거대 푸딩이 떨어져 튕겨냈다|탱글'],
+  ['mattress', 'bounce', 'cd', { x: 'mattress' }, { h: 1.1, spd: 16, mode: 'slide', snd: 'thud' }, '引っ越し屋さんが運んでいたマットレスで跳ね返った|失礼しまーす', 'Bounced off a mattress movers were carrying|Coming through!', '撞到搬家工人搬的床墊彈回來|借過～', '이삿짐센터가 나르던 매트리스에 튕겼다|지나갈게요'],
+  ['tires', 'bounce', 'abc', { x: 'tires' }, { h: .8, spd: 16, mode: 'static', snd: 'boing' }, '積まれたタイヤで跳ね返った|ボン', 'Bounced off a stack of tires|BOMF', '撞到一疊輪胎彈回來|砰', '쌓인 타이어에 튕겼다|봉'],
+  ['bumper', 'bounce', 'bd', { x: 'bumper' }, { h: .6, spd: 30, mode: 'rise', snd: 'ding' }, 'なぜかピンボールのバンパーがあった|ピンポーン', 'There was a pinball bumper for some reason|DING DING', '不知為何有個彈珠台的撞擊器|叮咚', '왠지 핀볼 범퍼가 있었다|띵동'],
+  ['belly', 'bounce', 'ac', { p: { w: 1.85, belt: 0x202020 } }, { h: 1.2, spd: 16, mode: 'static', st: 'belly', snd: 'boing' }, '力士のお腹で跳ね返った|ぼよーん', "Bounced off a sumo wrestler's belly|BOYOING", '撞到相撲力士的肚子彈回來|啵嚶～', '스모 선수 배에 튕겼다|뽀용'],
+  ['fridge', 'bounce', 'abc', { x: 'fridge' }, { h: 1.2, spd: 18, mode: 'static', snd: 'clang' }, '粗大ゴミの冷蔵庫に当たって跳ね返った|ゴン', 'Bounced off a dumped fridge|THUNK', '撞到大型垃圾冰箱彈回來|咚', '버려진 냉장고에 맞고 튕겼다|쿵'],
+  ['piano', 'bounce', 'bcd', { x: 'piano' }, { h: 1.0, spd: 18, mode: 'drop', snd: 'piano' }, '空からピアノが落ちてきた|ジャーン', 'A piano fell from the sky|PLONNNG', '天上掉下一台鋼琴|噹——', '하늘에서 피아노가 떨어졌다|쾅'],
+  ['safe', 'bounce', 'bcd', { x: 'safe' }, { h: .8, spd: 16, mode: 'drop', snd: 'clang' }, '空から金庫が落ちてきた|ドスン', 'A safe fell from the sky|THUD', '天上掉下一個保險箱|咚', '하늘에서 금고가 떨어졌다|쿵'],
+  ['anvil', 'bounce', 'ac', { x: 'anvil' }, { h: .5, spd: 14, mode: 'drop', snd: 'clang' }, '空から金床が落ちてきた|ガーン', 'An anvil fell from the sky|CLANG', '天上掉下鐵砧|鏗', '하늘에서 모루가 떨어졌다|깡'],
+  ['tree', 'bounce', 'bd', { x: 'tree' }, { h: 1.8, spd: 18, mode: 'static', snd: 'swish' }, 'しなった木の枝に弾き返された|バサッ', 'A springy branch whacked it back|SWISH', '被彎曲的樹枝彈回來|唰', '휘어진 나뭇가지에 튕겼다|휙'],
+  ['bamboo', 'bounce', 'bcd', { x: 'bamboo' }, { h: 1.4, spd: 22, mode: 'static', snd: 'swish' }, '竹がしなって弾き返した|ビュン', 'Bamboo flexed and flung it back|THWIP', '竹子一彎把它彈回來|咻', '대나무가 휘어 튕겨냈다|휙'],
+  ['dish', 'bounce', 'de', { x: 'dish' }, { h: 2.0, spd: 22, mode: 'static', snd: 'clang' }, 'パラボラアンテナで反射した|ピピッ', 'Reflected off a satellite dish|Beep beep', '被衛星天線反射回來|嗶嗶', '파라볼라 안테나에 반사됐다|삐빅'],
+  ['billboard', 'bounce', 'bde', { x: 'billboard' }, { h: 2.6, spd: 22, mode: 'rise', snd: 'bonk' }, '急にせり上がってきた看板で跳ね返った|大好評', 'A billboard rose up and bounced it back|NOW OPEN', '突然升起的看板把它彈回來|大好評', '갑자기 솟은 간판에 튕겼다|절찬 판매'],
+  ['snowman', 'bounce', 'ac', { x: 'snowman' }, { h: 1.2, spd: 14, mode: 'static', snd: 'thud' }, '雪だるまに当たって跳ね返った|ボフッ', 'Bounced off a snowman|POOF', '撞到雪人彈回來|噗', '눈사람에 맞고 튕겼다|퍽'],
+  ['duck', 'bounce', 'cd', { x: 'duck' }, { h: 1.2, spd: 16, mode: 'pop', snd: 'squeak' }, '急にふくらんだ巨大なアヒルのおもちゃで跳ね返った|プピー', 'Bounced off a giant rubber duck that inflated out of nowhere|SQUEAK', '撞到突然膨脹的巨大橡皮鴨彈回來|嗶～', '갑자기 부풀어 오른 거대 고무 오리에 튕겼다|삑'],
+  ['maneki', 'bounce', 'bcd', { x: 'maneki' }, { h: 1.8, spd: 18, mode: 'static', snd: 'bell' }, '巨大な招き猫に招き返された|おいでおいで', 'A giant beckoning cat beckoned it back|Come back~', '被巨大招財貓招回來|來喔來喔', '거대 마네키네코가 손짓해 돌려보냈다|이리 와'],
+  ['komainu', 'bounce', 'bd', { x: 'komainu' }, { h: 1.1, spd: 18, mode: 'static', snd: 'clang' }, '狛犬に当たって跳ね返った|ガルル', 'Bounced off a shrine guardian dog|Grrr', '撞到神社的石獅彈回來|吼', '신사의 고마이누에 튕겼다|크르릉'],
+  ['jizo', 'bounce', 'abc', { x: 'jizo' }, { h: .8, spd: 14, mode: 'static', snd: 'thud' }, 'お地蔵さまに当たって跳ね返った|……ありがたや', 'Bounced off a little roadside Jizo statue|...Bless', '撞到路邊的地藏菩薩彈回來|…感恩', '길가의 지장보살상에 튕겼다|…고마워라'],
+  ['koban', 'bounce', 'bd', { x: 'koban' }, { h: 1.6, spd: 20, mode: 'static', snd: 'clang' }, '交番の壁に当たって跳ね返った|こら！', 'Bounced off a police box|Hey!', '撞到派出所的牆彈回來|喂！', '파출소 벽에 튕겼다|이놈!'],
+  ['cones', 'bounce', 'ac', { x: 'cones' }, { h: .5, spd: 14, mode: 'static', snd: 'pock' }, 'カラーコーンに当たって跳ね返った|ポコン', 'Bounced off a traffic cone|BOK', '撞到三角錐彈回來|啵', '라바콘에 튕겼다|퐁'],
+  ['police', 'bounce', 'bde', { v: { k: 'police' } }, { h: 1.2, spd: 24, mode: 'slide', snd: 'siren' }, 'パトカーのボンネットで跳ね返った|ウー', 'Bounced off a police car hood|WEE-OO', '撞到警車引擎蓋彈回來|喔咿喔咿', '경찰차 보닛에 튕겼다|삐뽀'],
+  ['icecream', 'bounce', 'de', { v: { k: 'van', c: 0xf4a0c0 } }, { h: 1.4, spd: 22, mode: 'slide', snd: 'ding' }, '移動販売のアイス屋さんの車で跳ね返った|アイスいかがー', 'Bounced off an ice cream van|Ice cream~', '撞到賣冰淇淋的車彈回來|要不要冰淇淋～', '아이스크림 트럭에 튕겼다|아이스크림~'],
+  ['mushroom', 'bounce', 'acd', { x: 'mushroom' }, { h: 1.2, spd: 16, mode: 'pop', snd: 'boing' }, '地面から巨大キノコが生えて弾んだ|ぼいん', 'A giant mushroom sprouted and bounced it|BOING', '地面長出巨大香菇把它彈回來|啵嚶', '땅에서 거대 버섯이 자라 튕겨냈다|뽀잉'],
+  ['torii', 'bounce', 'bde', { x: 'torii' }, { h: 3.3, spd: 22, mode: 'static', snd: 'clang' }, '鳥居に当たって跳ね返った|カーン', 'Bounced off a shrine gate|KONG', '撞到鳥居彈回來|鏗', '도리이에 맞고 튕겼다|깡'],
+  ['goalpost', 'bounce', 'de', { x: 'goalpost' }, { h: 2.4, spd: 22, mode: 'static', snd: 'clang' }, 'サッカーゴールのバーに当たって跳ね返った|バー！', 'Hit the crossbar and came back|OFF THE BAR!', '打中球門橫桿彈回來|中楣！', '골대 크로스바를 맞고 튕겼다|크로스바!'],
+  ['hoop', 'bounce', 'cd', { x: 'hoop' }, { h: 3.0, spd: 18, mode: 'static', snd: 'bonk' }, 'バスケットゴールのボードで跳ね返った|リバウンド', 'Bounced off a basketball backboard|REBOUND', '撞到籃板彈回來|籃板', '농구 백보드에 튕겼다|리바운드'],
+  // ---- 運んでくる
+  ['roomba', 'carry', 'ac', { v: { k: 'roomba' } }, { spd: 1.8, give: 'feet', snd: 'beep' }, 'お掃除ロボットに回収されて足もとに戻された|ピピッ', 'A robot vacuum collected it and brought it back|Beep', '被掃地機器人回收送回腳邊|嗶嗶', '로봇청소기가 회수해 발밑으로 가져왔다|삐빅'],
+  ['tortoise', 'carry', 'a', { x: 'tortoise' }, { spd: .9, give: 'feet', mv: 'crawl' }, 'カメが甲羅にのせて運んできた|……', 'A tortoise carried it back on its shell|...', '烏龜用殼載著送回來|……', '거북이가 등딱지에 얹어 가져왔다|……'],
+  ['deliverybot', 'carry', 'acd', { v: { k: 'robot' } }, { spd: 3, give: 'hand', snd: 'beep' }, '配達ロボットに配達された|お届けです', 'A delivery robot delivered it|Your delivery', '被外送機器人送回來|您的外送', '배달 로봇이 배달해 왔다|배달 왔습니다'],
+  ['pizza', 'carry', 'de', { v: { k: 'scooter', c: 0xd03030 }, rider: { cap: 0xd03030 } }, { spd: 11, give: 'hand', snd: 'engine' }, 'ピザ屋のバイクに届けられた|30分以内です', 'A pizza scooter delivered it|Under 30 minutes!', '被披薩外送機車送回來|30分鐘內送達', '피자 배달 오토바이가 가져왔다|30분 이내!'],
+  ['taxi', 'carry', 'de', { v: { k: 'taxi' } }, { spd: 12, give: 'hand', snd: 'honk' }, 'タクシーに「お客さん、忘れ物ですよ」と届けられた|忘れ物ですよ', 'A taxi brought it back: you forgot this|You forgot this', '計程車司機說「客人你忘了東西」送回來|你忘了東西', '택시가 두고 간 물건이라며 가져왔다|두고 가셨어요'],
+  ['ambulance', 'carry', 'de', { v: { k: 'van', c: 0xf6f6f6 } }, { spd: 13, give: 'hand', snd: 'siren' }, '救急車に運ばれてきた|ピーポーピーポー', 'An ambulance rushed it back|WEE-OO WEE-OO', '被救護車載回來|喔咿喔咿', '구급차에 실려 왔다|삐뽀삐뽀'],
+  ['firetruck', 'carry', 'de', { v: { k: 'truck', c: 0xd02020 } }, { spd: 12, give: 'hand', snd: 'siren' }, '消防車に届けられた|火の用心', 'A fire truck brought it back|Fire safety!', '被消防車送回來|小心火燭', '소방차가 가져왔다|불조심'],
+  ['copbike', 'carry', 'cde', { v: { k: 'bike' }, rider: { cap: 0x1d2a5a } }, { spd: 6, give: 'hand', snd: 'bell' }, 'おまわりさんが自転車で落とし物を届けてくれた|落とし物ですよ', 'A cop on a bicycle returned your lost item|You dropped this', '警察騎腳踏車把失物送回來|您的失物', '자전거 탄 경찰이 분실물을 가져왔다|분실물입니다'],
+  ['horse', 'carry', 'de', { q: 'horse' }, { spd: 14, give: 'hand', snd: 'neigh' }, '馬がくわえて駆けてきた|ヒヒーン', 'A horse galloped it back|NEIGH', '被馬叼著跑回來|嘶～', '말이 물고 달려왔다|히히힝'],
+  ['cow', 'carry', 'ac', { q: 'cow' }, { spd: 1.6, give: 'feet', snd: 'moo', mv: 'walk' }, '牛がのんびり運んできた|モー', 'A cow slowly brought it back|Moo', '被牛慢吞吞地送回來|哞', '소가 느긋하게 가져왔다|음매'],
+  ['pig', 'carry', 'acd', { q: 'pig' }, { spd: 3, give: 'feet', snd: 'oink' }, '豚に鼻で転がされて戻ってきた|ブヒ', 'A pig nosed it all the way back|Oink', '被豬用鼻子一路推回來|齁', '돼지가 코로 굴려서 가져왔다|꿀꿀'],
+  ['sheep', 'carry', 'ac', { q: 'sheep' }, { spd: 2.4, give: 'feet', snd: 'baa', mv: 'walk' }, '羊が持ってきた|メェ〜', 'A sheep brought it back|Baa', '被綿羊叼回來|咩～', '양이 가져왔다|메에~'],
+  ['deer', 'carry', 'acd', { q: 'deer' }, { spd: 6, give: 'hand' }, '鹿せんべいと間違えた鹿に持ってこられた|ぺこり', 'A deer mistook it for a deer cracker and brought it back|*bow*', '被以為是鹿仙貝的鹿叼回來|（鞠躬）', '사슴 센베인 줄 안 사슴이 가져왔다|꾸벅'],
+  ['boar', 'carry', 'cde', { q: 'boar' }, { spd: 13, give: 'feet', snd: 'grunt' }, 'イノシシが突進して持ってきた|ブモォ', 'A boar charged it back|SNORT', '被山豬衝撞送回來|噗噗', '멧돼지가 돌진해서 가져왔다|꿀꿀'],
+  ['bear', 'carry', 'cde', { q: 'bear' }, { spd: 8, give: 'hand', snd: 'growl' }, 'クマに「落としましたよ」と届けられた|お嬢さん', 'A bear politely returned it|Excuse me, miss', '被熊有禮貌地送回來|小姐', '곰이 정중하게 가져왔다|아가씨'],
+  ['panda', 'carry', 'ac', { q: 'panda' }, { spd: 1.8, give: 'feet', mv: 'walk' }, 'パンダがゴロゴロ転がしてきた|……', 'A panda rolled it back lazily|...', '被熊貓懶洋洋地滾回來|……', '판다가 데굴데굴 굴려 왔다|……'],
+  ['tanuki', 'carry', 'acd', { q: 'tanuki' }, { spd: 5, give: 'feet' }, 'たぬきが持ってきた|ポンポコ', 'A tanuki brought it back|Ponpoko', '被狸貓叼回來|砰砰', '너구리가 가져왔다|퐁퐁'],
+  ['fox', 'carry', 'acd', { q: 'fox' }, { spd: 9, give: 'feet', snd: 'yip' }, 'きつねが持ってきた|コン', 'A fox brought it back|Yip', '被狐狸叼回來|嗚', '여우가 가져왔다|콘'],
+  ['catcarry', 'carry', 'ac', { q: 'catq' }, { spd: 4, give: 'feet', snd: 'meow' }, '猫がくわえて自慢げに持ってきた|ニャー', 'A cat proudly brought it back|Meow', '被貓叼著得意地送回來|喵～', '고양이가 자랑스럽게 물어 왔다|야옹'],
+  ['penguin', 'carry', 'a', { x: 'penguin' }, { spd: 1.2, give: 'feet', mv: 'waddle' }, 'ペンギンがよちよち運んできた|ペタペタ', 'A penguin waddled it back|Waddle waddle', '被企鵝搖搖晃晃地送回來|啪噠啪噠', '펭귄이 뒤뚱뒤뚱 가져왔다|뒤뚱뒤뚱'],
+  ['ostrich', 'carry', 'de', { q: 'ostrich' }, { spd: 18, give: 'feet' }, 'ダチョウが猛ダッシュで持ってきた|ドドドド', 'An ostrich sprinted it back|THUD THUD THUD', '被鴕鳥狂奔送回來|咚咚咚', '타조가 전력질주로 가져왔다|두두두'],
+  ['kangaroo', 'carry', 'cde', { q: 'kangaroo' }, { spd: 11, give: 'hand', mv: 'hop' }, 'カンガルーにお腹のポケットに入れて運ばれた|ピョーン', 'A kangaroo hopped it back in its pouch|BOING BOING', '被袋鼠放進育兒袋跳回來|蹦～', '캥거루가 주머니에 넣어 뛰어왔다|깡총'],
+  ['camel', 'carry', 'de', { q: 'camel' }, { spd: 4, give: 'hand', mv: 'walk' }, 'ラクダがゆっくり運んできた|グォー', 'A camel slowly carried it back|Hrrmph', '被駱駝慢慢載回來|咕喔', '낙타가 천천히 가져왔다|크어'],
+  ['lion', 'carry', 'de', { q: 'lion' }, { spd: 12, give: 'feet', snd: 'roar' }, 'ライオンが持ってきた|ガオー', 'A lion brought it back|ROAR', '被獅子叼回來|吼～', '사자가 물어 왔다|어흥'],
+  ['cheetah', 'carry', 'de', { q: 'cheetah' }, { spd: 28, give: 'feet' }, 'チーターが時速100kmで持ってきた|シュッ', 'A cheetah brought it back at 60 mph|ZOOM', '被獵豹以時速100公里送回來|咻', '치타가 시속 100km로 가져왔다|슉'],
+  ['chihuahua', 'carry', 'ac', { q: 'chihuahua' }, { spd: 3, give: 'feet', snd: 'yip' }, 'チワワが小刻みに震えながら運んできた|キャン', 'A trembling chihuahua brought it back|Yip!', '被發抖的吉娃娃送回來|汪嗚', '치와와가 덜덜 떨면서 가져왔다|깽'],
+  ['rabbit', 'carry', 'ac', { q: 'rabbit' }, { spd: 4, give: 'feet', mv: 'hop' }, 'うさぎがぴょんぴょん運んできた|ぴょん', 'A rabbit hopped it back|Hop', '被兔子蹦蹦跳跳送回來|蹦', '토끼가 깡총깡총 가져왔다|깡총'],
+  ['frog', 'carry', 'a', { q: 'frog' }, { spd: 2.2, give: 'feet', mv: 'hop', snd: 'croak' }, 'カエルが跳ねながら押してきた|ケロッ', 'A frog hop-pushed it back|Ribbit', '被青蛙跳著推回來|呱', '개구리가 뛰면서 밀고 왔다|개굴'],
+  ['crab', 'carry', 'a', { x: 'crab' }, { spd: 1.5, give: 'feet', mv: 'side' }, 'カニに横歩きで運ばれてきた|チョキチョキ', 'A crab side-walked it back|Snip snip', '被螃蟹橫著走送回來|喀嚓喀嚓', '게가 옆걸음으로 가져왔다|싹둑싹둑'],
+  ['ants', 'carry', 'a', { x: 'ants' }, { spd: 1.0, give: 'feet', mv: 'slide' }, 'アリの行列に運ばれてきた|えっさほいさ', 'A line of ants carried it back|Heave ho', '被一排螞蟻搬回來|嘿咻嘿咻', '개미 행렬이 운반해 왔다|영차영차'],
+  ['cart', 'carry', 'acd', { v: { k: 'cart' } }, { spd: 5, give: 'feet', snd: 'clatter' }, '転がってきたショッピングカートに乗って戻ってきた|ガラガラ', 'It came back riding a runaway shopping cart|Clatter', '搭著滑過來的購物車回來|喀啦喀啦', '굴러온 쇼핑카트를 타고 돌아왔다|덜그럭'],
+  ['courier', 'carry', 'cde', { p: { cap: 0x2a7a3a } }, { spd: 5, give: 'feet' }, '宅配便のお兄さんに置き配された|置き配です', 'A delivery guy left it at your door|Left at your door', '被宅配員放在門口|放門口喔', '택배 기사님이 문 앞에 두고 갔다|문 앞에 둘게요'],
+  ['paperboy', 'carry', 'de', { v: { k: 'bike' }, rider: { cap: 0x806040 } }, { spd: 7, give: 'feet', snd: 'bell' }, '新聞配達のおじさんに投げ込まれた|毎度', 'The paperboy tossed it onto your porch|Morning!', '被送報的大叔丟進來|每天見', '신문 배달 아저씨가 던져 넣었다|매일 감사'],
+  ['stroller', 'carry', 'cd', { v: { k: 'stroller' }, rider: { bun: 1 } }, { spd: 2.5, give: 'hand' }, 'ベビーカーのお母さんに届けられた|これ、あなたの？', 'A mom with a stroller brought it back|Is this yours?', '推嬰兒車的媽媽送回來|這是你的嗎？', '유모차 끄는 엄마가 가져왔다|이거 당신 거예요?'],
+  ['jogger', 'carry', 'de', { p: { cap: 0xe06020 } }, { spd: 4.5, give: 'hand' }, 'ジョギング中の人に届けられた|ハッ、ハッ', 'A jogger brought it back|Huff, puff', '被慢跑的人送回來|呼、呼', '조깅하던 사람이 가져왔다|헉헉'],
+  ['sprinter', 'carry', 'de', { p: { c: 0xf0f0f0 } }, { spd: 10, give: 'hand' }, '陸上部に全力疾走で届けられた|位置について', 'A track star sprinted it back|On your marks', '被田徑社全力衝刺送回來|各就各位', '육상부가 전력질주로 가져왔다|제자리에'],
+  ['tractor', 'carry', 'de', { v: { k: 'tractor', c: 0x2a8a3a } }, { spd: 4, give: 'feet', snd: 'engine' }, '農家のトラクターに運ばれてきた|ドッドッド', "A farmer's tractor hauled it back|Putt-putt", '被農夫的拖拉機載回來|噗噗噗', '농부의 트랙터가 실어 왔다|통통통'],
+  ['forklift', 'carry', 'cd', { v: { k: 'forklift' } }, { spd: 3, give: 'feet', snd: 'beep' }, 'フォークリフトで丁寧に運ばれてきた|ピーピー', 'A forklift carefully carried it back|Beep beep', '被堆高機小心地載回來|嗶嗶', '지게차가 조심스레 실어 왔다|삐삐'],
+  ['kart', 'carry', 'de', { v: { k: 'kart', c: 0xe0c020 } }, { spd: 16, give: 'feet', snd: 'engine' }, 'ゴーカートが乗せて戻ってきた|ブーン', 'A go-kart zoomed it back|VROOM', '被卡丁車載回來|噗——', '고카트가 싣고 돌아왔다|부웅'],
+  ['garbage', 'carry', 'de', { v: { k: 'truck', c: 0x3a7ad0 } }, { spd: 7, give: 'feet', snd: 'beep' }, 'ゴミ収集車に「回収できません」と戻された|回収できません', 'A garbage truck rejected it|Cannot collect', '被垃圾車說「無法回收」退回來|無法回收', '쓰레기차가 수거 불가라며 돌려줬다|수거 불가'],
+  ['butler', 'carry', 'cd', { p: { c: 0x202024, prop: 'tray' } }, { spd: 3, give: 'hand', mv: 'walk' }, '執事に銀のお盆で届けられた|お坊ちゃま', 'A butler presented it on a silver tray|Your item, sir', '被管家用銀盤送回來|少爺', '집사가 은쟁반에 담아 가져왔다|도련님'],
+  ['marathon', 'carry', 'e', { p: { cap: 0xd0d020 } }, { spd: 5.5, give: 'hand' }, 'マラソンの選手に給水所と間違えて持ってこられた|ハァハァ', 'A marathoner mistook you for a water station|Pant pant', '被以為你是補給站的馬拉松選手送回來|哈、哈', '마라톤 선수가 급수대로 착각해 가져왔다|헉헉'],
+  // ---- 空から運ぶ
+  ['pigeon', 'air', 'cd', { b: { c: 0x8a8f9a, sc: 1.4 } }, { f: .6, spd: 9 }, 'ハトがくわえて頭の上に落とした|ポッポー', 'A pigeon dropped it on your head|Coo coo', '被鴿子叼起來丟在你頭上|咕咕', '비둘기가 물어다 머리 위에 떨어뜨렸다|구구'],
+  ['seagull', 'air', 'de', { b: { c: 0xf2f2f2, sc: 1.9 } }, { f: .7, spd: 12 }, 'カモメにさらわれて返された|ミャア', 'A seagull snatched it and dropped it back|Mew mew', '被海鷗叼走又丟回來|喵～', '갈매기가 채가더니 돌려줬다|끼룩'],
+  ['eagle', 'air', 'deh', { b: { c: 0x6a4020, sc: 3 } }, { f: .5, spd: 16 }, 'ワシにつかまれて運ばれてきた|ピィー', 'An eagle grabbed it and brought it back|SCREE', '被老鷹抓住送回來|嗶——', '독수리가 낚아채 가져왔다|삐익'],
+  ['owl', 'air', 'cdh', { b: { c: 0x9a7a50, sc: 1.8 } }, { f: 0, spd: 7 }, 'フクロウが音もなく運んできた|ホー', 'An owl silently brought it back|Hoo', '被貓頭鷹無聲地送回來|咕～', '부엉이가 소리 없이 가져왔다|부엉'],
+  ['pelican', 'air', 'de', { b: { c: 0xf0ece0, sc: 2.6 } }, { f: .8, spd: 10 }, 'ペリカンが口に入れて運んできた|ガバッ', 'A pelican scooped it up and flew it back|GULP', '被鵜鶘放進嘴裡送回來|啊嗚', '펠리컨이 입에 넣고 가져왔다|덥석'],
+  ['parrot', 'air', 'cd', { b: { c: 0x30b050, sc: 1.2 } }, { f: .5, spd: 10, snd: 'caw' }, 'オウムが「カエレ」と言いながら返してきた|カエレ！カエレ！', 'A parrot returned it squawking GO HOME|GO HOME! GO HOME!', '被鸚鵡一邊說「回去」一邊送回來|回去！回去！', '앵무새가 돌아가라며 돌려줬다|돌아가! 돌아가!'],
+  ['swallow', 'air', 'de', { b: { c: 0x1a2040, sc: 1 } }, { f: .4, spd: 22 }, 'ツバメが一瞬でUターンして運んできた|ピッ', 'A swallow U-turned it back in a flash|Tweet', '被燕子瞬間迴轉送回來|啾', '제비가 순식간에 유턴해 가져왔다|짹'],
+  ['bat', 'air', 'cdh', { b: { c: 0x2a2030, sc: 1.3 } }, { f: 0, spd: 11 }, 'コウモリが運んできた|キィキィ', 'A bat flew it back|Squeak', '被蝙蝠送回來|吱吱', '박쥐가 가져왔다|끽끽'],
+  ['drone', 'air', 'deh', { f: { k: 'drone', c: 0xf0f0f0 } }, { f: .6, spd: 12, snd: 'buzz' }, '宅配ドローンに再配達された|再配達です', 'A delivery drone re-delivered it|Redelivery', '被外送無人機重新配送|重新配送', '배달 드론이 재배달했다|재배달입니다'],
+  ['heli', 'air', 'eh', { f: { k: 'heli', c: 0x2a5ab0 } }, { f: 0, spd: 20, H: 9, snd: 'buzz' }, '報道ヘリに吊り上げられて戻ってきた|スクープです', 'A news helicopter airlifted it back|Breaking news!', '被新聞直升機吊回來|獨家！', '보도 헬기에 매달려 돌아왔다|특종입니다'],
+  ['balloon', 'air', 'deh', { f: { k: 'balloon', c: 0xe04040 } }, { f: 0, spd: 3, H: 9 }, '熱気球のかごに入ってゆっくり戻ってきた|ふわぁ', 'It drifted back in a hot air balloon|Whee~', '搭熱氣球慢慢飄回來|輕飄飄', '열기구 바구니에 실려 천천히 돌아왔다|두둥실'],
+  ['blimp', 'air', 'eh', { f: { k: 'blimp', c: 0xd0d4da } }, { f: 0, spd: 5, H: 14 }, '飛行船に回収されて戻ってきた|ブゥーン', 'A blimp picked it up and brought it back|Bwoooom', '被飛行船回收送回來|嗡——', '비행선이 회수해 돌아왔다|부웅'],
+  ['witch', 'air', 'deh', { f: { k: 'broom', c: 0x1a1a22 } }, { f: .5, spd: 14 }, 'ほうきに乗った魔女が届けてくれた|お届けものです', 'A witch on a broom delivered it|Special delivery', '騎掃把的魔女送回來|您的包裹', '빗자루 탄 마녀가 배달해 줬다|배달입니다'],
+  ['hero', 'air', 'eh', { f: { k: 'hero', c: 0xd03030 } }, { f: .5, spd: 24 }, '空飛ぶヒーローに救出されて戻ってきた|もう大丈夫だ', "A flying hero rescued it and brought it back|You're safe now", '被飛天英雄救回來|已經沒事了', '하늘을 나는 히어로가 구해서 가져왔다|이제 괜찮아'],
+  ['angel', 'air', 'eh', { f: { k: 'angel', c: 0xffffff } }, { f: 0, spd: 6, H: 10, snd: 'bell' }, '天使に「まだ早い」と返された|まだ早いです', 'An angel sent it back: too early|Not yet', '被天使說「還太早」送回來|還太早了', '천사가 아직 이르다며 돌려보냈다|아직 일러요'],
+  ['stork', 'air', 'deh', { b: { c: 0xf8f8f8, sc: 2.4 } }, { f: .6, spd: 11 }, 'コウノトリに赤ちゃんと間違えて届けられた|おめでとうございます', 'A stork delivered it, thinking it was a baby|Congratulations!', '被以為是嬰兒的送子鳥送回來|恭喜！', '황새가 아기인 줄 알고 배달했다|축하합니다!'],
+  ['sparrow', 'air', 'cd', { b: { c: 0x8a6a4a, sc: .9 } }, { f: .5, spd: 7 }, 'スズメがよってたかって運んできた|チュンチュン', 'A flock of sparrows carried it back together|Chirp chirp', '被一群麻雀合力送回來|啾啾', '참새 떼가 함께 날라 왔다|짹짹'],
+  // ---- 地面から噴き出す
+  ['volcano', 'erupt', 'cde', { x: 'volcano' }, { delay: .9, spd: 9, fx: 0xff6020, mode: 'pop', snd: 'boom2' }, '落ちたところに小さな火山ができて噴火した|ドカーン', 'A tiny volcano formed and erupted|KABOOM', '落地處形成小火山噴發了|轟——', '떨어진 곳에 작은 화산이 생겨 분화했다|쾅'],
+  ['oil', 'erupt', 'de', { x: 0 }, { delay: .8, spd: 10, fx: 0x1a1a1a, snd: 'splash' }, '落ちたところから石油が噴き出した|ボコボコ', 'Oil gushed out where it landed|GLUG GLUG', '落地處噴出石油|咕嘟咕嘟', '떨어진 곳에서 석유가 솟구쳤다|부글부글'],
+  ['hydrant', 'erupt', 'cd', { x: 'hydrant' }, { delay: .6, spd: 11, fx: 0xbfe6ff, mode: 'static', snd: 'splash' }, '消火栓が破裂して打ち上げられた|ブシャー', 'A fire hydrant burst and launched it|SPLOOSH', '消防栓破裂把它沖上天|噗咻——', '소화전이 터져 날아갔다|푸슉'],
+  ['manhole', 'erupt', 'cd', { x: 'manhole' }, { delay: .7, spd: 12, fx: 0xd0d0d0, mode: 'static', snd: 'clang' }, 'マンホールのふたごと飛ばされた|ポーン', 'It got launched along with a manhole cover|PWANG', '連人孔蓋一起被炸飛|啵——', '맨홀 뚜껑째 날아갔다|퐁'],
+  ['jackbox', 'erupt', 'acd', { x: 'jackbox' }, { delay: .8, spd: 12, mode: 'pop', snd: 'boing' }, 'びっくり箱から飛び出した|びよーん', 'It sprang out of a jack-in-the-box|SPROING', '從驚嚇箱彈出來|嘣～', '깜짝 상자에서 튀어나왔다|뾰옹'],
+  ['toaster', 'erupt', 'acd', { x: 'toaster' }, { delay: 1.0, spd: 12, mode: 'pop', snd: 'ding' }, '巨大トースターで焼かれて飛び出した|チン！', 'A giant toaster popped it out|DING!', '被巨大烤麵包機烤好彈出來|叮！', '거대 토스터에서 구워져 튀어나왔다|띵!'],
+  ['takenoko', 'erupt', 'cd', { x: 'takenoko' }, { delay: .8, spd: 12, mode: 'pop', snd: 'swish' }, 'タケノコが急成長して打ち上げた|ニョキッ', 'A bamboo shoot grew super fast and launched it|SPROUT', '竹筍急速生長把它頂上天|咻地', '죽순이 급성장해서 쏘아 올렸다|쑥'],
+  ['worm', 'erupt', 'acd', { x: 'worm' }, { delay: .9, spd: 10, mode: 'pop', snd: 'squish' }, '地面から巨大ミミズが出てきて弾き飛ばした|ニュルン', 'A giant earthworm burst out and flicked it|SQUISH', '地面鑽出巨大蚯蚓把它彈飛|滑溜', '땅에서 거대 지렁이가 나와 튕겨냈다|꿈틀'],
+  ['seesaw', 'erupt', 'cd', { x: 'seesaw' }, { delay: 1.0, spd: 12, mode: 'static', snd: 'thud', sumo: 1 }, 'シーソーの反対側に力士が飛び乗った|どすこい', 'A sumo wrestler jumped on the other end of a seesaw|DOSUKOI', '相撲力士跳上蹺蹺板的另一頭|嘿咻', '시소 반대편에 스모 선수가 뛰어올랐다|돗스코이'],
+  ['catapult', 'erupt', 'de', { x: 'catapult' }, { delay: 1.0, spd: 14, mode: 'static', snd: 'thud', arm: 1 }, '投石機に乗せられて打ち返された|放てー！', 'It got loaded into a catapult and fired back|FIRE!', '被放上投石機射回來|發射！', '투석기에 실려 발사됐다|발사!'],
+  ['cannon', 'erupt', 'de', { x: 'cannon' }, { delay: 1.1, spd: 18, mode: 'static', snd: 'boom2', fx: 0x9a9a9a }, '大砲に詰められて撃ち返された|撃てー！', 'It got stuffed into a cannon and fired back|FIRE!', '被塞進大砲射回來|開炮！', '대포에 넣어져 발사됐다|쏴라!'],
+  ['popcorn', 'erupt', 'cd', { x: 'popcorn' }, { delay: 1.0, spd: 11, mode: 'pop', snd: 'pop' }, 'ポップコーンマシンではじけた|ポンッ', 'It popped out of a popcorn machine|POP', '在爆米花機裡爆開彈出來|砰', '팝콘 기계에서 튀어나왔다|펑'],
+  ['steam', 'erupt', 'de', { x: 0 }, { delay: .7, spd: 12, fx: 0xffffff, snd: 'splash' }, '地面から蒸気が噴き出して打ち上げられた|シュー', 'A steam vent blasted it up|HISSSS', '地面噴出蒸氣把它沖上天|嘶——', '땅에서 증기가 뿜어져 쏘아 올렸다|쉬익'],
+  ['fountain', 'erupt', 'cd', { x: 'fountain' }, { delay: .6, spd: 10, fx: 0xbfe6ff, mode: 'static', snd: 'splash' }, '噴水のショーが始まって打ち上げられた|♪', 'A fountain show started and launched it|♪', '噴泉秀開始把它噴上天|♪', '분수 쇼가 시작돼 쏘아 올렸다|♪'],
+  ['airbag', 'erupt', 'acd', { x: 0 }, { delay: .5, spd: 12, fx: 0xf0f0f0, snd: 'pop' }, '地面に埋まっていたエアバッグが作動した|バフッ', 'A buried airbag deployed|BAMF', '埋在地下的安全氣囊啟動了|砰', '땅에 묻힌 에어백이 터졌다|퍽'],
+  // ---- つまんで運ぶ
+  ['claw', 'claw', 'deh', { x: 0 }, {}, 'UFOキャッチャーのアームにつかまれて取り出し口に運ばれた|ゲット！', 'A giant claw machine grabbed it and dropped it at the prize chute|GOT IT!', '被巨大夾娃娃機的爪子夾住送到出口|夾到了！', '거대 인형뽑기 집게에 잡혀 배출구로 옮겨졌다|득템!'],
+  ['hook', 'claw', 'eh', { x: 0 }, { hook: 1 }, 'クレーン車のフックに引っかかって運ばれた|オーライオーライ', 'A crane hook snagged it and swung it back|All right, all right', '被吊車的掛鉤勾住送回來|好～好～', '크레인 갈고리에 걸려 옮겨졌다|오라이 오라이'],
+  // ---- ふしぎな帰り方
+  ['rewind', 'rewind', 'bcde', { x: 0 }, {}, '時間が巻き戻った|◀◀', 'Time rewound|◀◀', '時間倒轉了|◀◀', '시간이 되감겼다|◀◀'],
+  ['portal', 'portal', 'bdeh', { x: 0 }, { f: .6 }, 'ワープゲートに吸い込まれて背後から出てきた|ヴォン', 'A warp gate swallowed it and spat it out behind you|VWOMM', '被傳送門吸進去從背後出來|嗡', '워프 게이트에 빨려 들어가 뒤에서 나왔다|웅'],
+  ['ice', 'slide', 'abcd', { x: 0 }, { spd: 6, fx: 'ice' }, '道が凍っていて滑って戻ってきた|ツルーッ', 'The road was icy and it slid right back|Wheee', '路面結冰滑回來|咻——', '길이 얼어 미끄러져 돌아왔다|쭈욱'],
+  ['slope', 'slide', 'bd', { x: 0 }, { spd: 4, fx: 'slope' }, '下り坂だと思ったら上り坂だった|コロコロ', 'It turned out to be uphill, so it rolled back|Roll roll', '以為是下坡結果是上坡，滾回來了|咕嚕咕嚕', '내리막인 줄 알았는데 오르막이라 굴러왔다|데굴데굴'],
+  ['conveyor', 'slide', 'bd', { x: 0 }, { spd: 3, fx: 'belt' }, '道がベルトコンベアだった|ウィーン', 'The road was a conveyor belt|Whirrr', '路面是輸送帶|嗡——', '길이 컨베이어 벨트였다|위잉'],
+];
+const CATM = {};
+for (const c of CAT) {
+  CATM[c[0]] = c;
+  ['ja', 'en', 'zh', 'ko'].forEach((l, i) => { const [ca, bu] = c[5 + i].split('|'); CAUSE[l][c[0]] = ca; BUB[l][c[0]] = bu; });
+}
+function bandOf(ad, D) { return ad >= 65 ? 'h' : ad < 20 ? (D < 25 ? 'a' : 'b') : D < 25 ? 'c' : D < 70 ? 'd' : 'e'; }
+
+const VER = 2, DEG = Math.PI / 180, GR = 9.8, RX = -0.32, RY = 1.95, RZ = 0.3;
 const HAND = new THREE.Vector3(-0.3, 1.32, 0.42), FEET = new THREE.Vector3(-0.2, 0.09, 0.45);
 function mulberry32(a) { return function () { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
 const arcT = R => GR * R * R / 8;
-function makePlan(a10, p1000, seed) {
+function makePlan(a10, p1000, seed, ver = VER) {
   const ad = a10 / 10, th = ad * DEG, p = p1000 / 1000, v = 6 + 30 * p, vy = v * Math.sin(th), vz = v * Math.cos(th);
   const tl = (vy + Math.sqrt(vy * vy + 2 * GR * RY)) / GR, D = RZ + vz * tl;
   const tAt = h => (vy + Math.sqrt(Math.max(0, vy * vy + 2 * GR * (RY - h)))) / GR;
@@ -299,9 +502,13 @@ function makePlan(a10, p1000, seed) {
   else if (ad >= 82) e = 'head';
   else if (ad >= 41 && ad <= 49 && p >= 0.96) e = 'orbit';
   else {
-    if (ad >= 65) L = p < 0.7 ? ['crow', 'wind'] : p < 0.88 ? ['crow', 'ufo', 'wind'] : ['crow', 'ufo', 'plane'];
-    else if (ad < 20) L = D < 25 ? ['wall', 'sumo', 'dog'] : ['wall', 'dog', 'passerby', 'tennis'].concat(D > 30 ? ['boomerang'] : []);
-    else L = D < 25 ? ['dog', 'sumo', 'passerby', 'trampoline'] : D < 70 ? ['batter', 'tennis', 'dog', 'passerby', 'trampoline', 'grandma'] : ['keeper', 'golfer', 'grandma', 'passerby', 'trampoline', 'dog'];
+    const v2 = ver >= 2;
+    if (ad >= 65) L = (p < 0.7 ? ['crow', 'wind'] : p < 0.88 ? ['crow', 'ufo', 'wind'] : ['crow', 'ufo', 'plane']).concat(v2 ? ['kite', 'magnet'] : []);
+    else if (ad < 20) L = D < 25 ? ['wall', 'sumo', 'dog'].concat(v2 ? ['cat', 'mole', 'ambush'] : []) : ['wall', 'dog', 'passerby', 'tennis'].concat(D > 30 ? ['boomerang'] : []).concat(v2 ? ['ambush', 'bungee', 'clone', 'magnet'] : []);
+    else L = D < 25 ? ['dog', 'sumo', 'passerby', 'trampoline'].concat(v2 ? ['cat', 'mole', 'bungee'].concat(ad < 45 ? ['ambush'] : []) : [])
+      : D < 70 ? ['batter', 'tennis', 'dog', 'passerby', 'trampoline', 'grandma'].concat(v2 ? ['soccer', 'volley', 'kite', 'clone', 'magnet', 'bungee', 'geyser'].concat(ad < 45 ? ['ambush'] : []) : [])
+      : ['keeper', 'golfer', 'grandma', 'passerby', 'trampoline', 'dog'].concat(v2 ? ['kite', 'scooter', 'clone', 'geyser', 'volley', 'magnet'] : []);
+    if (v2) { const b = bandOf(ad, D); for (const c of CAT) if (c[2].includes(b)) L.push(c[0]); }
     e = L[Math.floor(r() * L.length)];
   }
   const j = 0.9 + 0.2 * r(), j2 = r();
@@ -326,6 +533,32 @@ function makePlan(a10, p1000, seed) {
     case 'ufo': ti = ta; S = [1.6, 2.6 + 0.6 * j2, 1.2, 2.2]; break;
     case 'plane': ti = ta; S = [0.9 + Math.sqrt(2 * (apY + 4 - HAND.y) / GR) + apZ / 30]; break;
     case 'boomerang': ti = 0; S = [2 * tl + D * 0.8 / 25 + 0.5]; break;
+    case 'ambush': ti = Math.min(0.38, tl * .5); S = [0.12 + dz(zAt(ti)) / 34]; break;
+    case 'kite': { ti = tl * (0.35 + 0.25 * j2); const d = Math.hypot(yAt(ti) - 6.5, zAt(ti) - 1.4); S = [0.4, d / (13 * j), Math.sqrt(2 * (6.5 - HAND.y) / GR)]; break; }
+    case 'cat': ti = tAt(0.35); S = [0.5 + dz(zAt(ti)) / 15]; break;
+    case 'soccer': ti = tAt(1.9); S = [0.1 + dz(zAt(ti)) / 24]; break;
+    case 'volley': ti = tAt(2.6); S = [0.1 + dz(zAt(ti)) / 30]; break;
+    case 'clone': ti = tl; S = [1.0, Math.max(1, tl)]; break;
+    case 'geyser': ti = tl; S = [0.7, 1.2 + dz(D) / 12]; break;
+    case 'mole': ti = tl; S = [0.8, 0.5 + dz(D) / 12]; break;
+    case 'scooter': ti = tl; S = [0.4, 1.2, Math.max(0.3, D - 1.3) / (12 * j), 0.8]; break;
+    case 'magnet': ti = ta * 0.9; S = [0.6, 0.15 + Math.hypot(yAt(ti) - HAND.y, zAt(ti) - HAND.z) / 22]; break;
+    case 'bungee': ti = tl * 0.75; S = [0.15 + Math.hypot(yAt(ti) - HAND.y, zAt(ti) - HAND.z) / 28]; break;
+    default: {
+      const c = CATM[e], q = c[4];
+      if (c[1] === 'hit') { ti = tAt(q.h ?? 1.2); S = [0.1 + dz(zAt(ti)) / q.spd]; }
+      else if (c[1] === 'catch') { ti = tAt(q.h ?? 1.3); S = [q.hold ?? 1, 0.15 + dz(zAt(ti)) / q.spd]; }
+      else if (c[1] === 'pick') { ti = tl; S = [q.hold ?? 1.2, 0.3 + dz(D) / q.spd]; }
+      else if (c[1] === 'bounce') { ti = tAt(q.h ?? 1); S = [0.1 + dz(zAt(ti)) / q.spd]; }
+      else if (c[1] === 'carry') { ti = tl; S = [0.4, 1.4, Math.max(0.3, D - 1.4) / (q.spd * j), 0.8]; }
+      else if (c[1] === 'air') { ti = q.f ? tl * q.f : ta; const Hh = q.H ?? 6.5, d = Math.hypot(yAt(ti) - Hh, zAt(ti) - 1.4); S = [0.4, d / (q.spd * j), Math.sqrt(2 * (Hh - HAND.y) / GR)]; }
+      else if (c[1] === 'erupt') { ti = tl; S = [q.delay ?? .7, 1.0 + dz(D) / q.spd]; }
+      else if (c[1] === 'claw') { ti = ta; S = [1.2, 1.4 + Math.hypot(yAt(ti), zAt(ti)) / 18, 1.2]; }
+      else if (c[1] === 'rewind') { ti = tl; S = [0.8, tl]; }
+      else if (c[1] === 'portal') { ti = tl * (q.f ?? .6); S = [0.6, 1.3]; }
+      else if (c[1] === 'slide') { ti = tl; S = [0.5, Math.max(0.3, D - 1) / (q.spd * j)]; }
+      break;
+    }
     case 'orbit': ti = 2.6; S = [26 + 8 * (1 - Math.abs(ad - 45) / 4) + 60 * (p - 0.96) + 0.5 * j2, 1.3]; break;
   }
   P.ti = ti; P.seg = S;
@@ -546,15 +779,48 @@ function makeDog() {
   return { G, head, legs, tail, mouth };
 }
 function dogRun(d, ph, amp) { d.legs.forEach((l, i) => l.rotation.x = Math.sin(ph + (i < 2 ? 0 : Math.PI) + (i % 2) * .5) * amp); d.G.children[0].position.y = .5 + Math.abs(Math.sin(ph)) * .05 * amp; }
-function makeCrow() {
+function makeCat() {
+  const G = new THREE.Group(); scene.add(G); const m = M.orange;
+  const b = mesh(new THREE.CapsuleGeometry(.09, .22, 6, 12), m, 0, .2, 0); b.rotation.x = Math.PI / 2; G.add(b);
+  const head = new THREE.Group(); head.position.set(0, .32, .2); G.add(head);
+  head.add(mesh(new THREE.SphereGeometry(.09, 14, 10), m));
+  for (const sd of [-1, 1]) { const e = mesh(new THREE.ConeGeometry(.035, .07, 4), m, sd * .05, .08, 0); head.add(e); }
+  for (const sd of [-1, 1]) head.add(mesh(new THREE.SphereGeometry(.013, 6, 4), M.black, sd * .035, .015, .085));
+  for (const [x, z] of [[-.05, -.12], [.05, -.12], [-.05, .12]]) G.add(mesh(new THREE.CylinderGeometry(.025, .025, .14, 6), m, x, .07, z));
+  const paw = new THREE.Group(); paw.position.set(.05, .14, .12); paw.add(mesh(new THREE.CylinderGeometry(.025, .025, .14, 6), m, 0, -.07, 0)); G.add(paw);
+  const tail = new THREE.Group(); tail.position.set(0, .22, -.18); tail.add(mesh(new THREE.CylinderGeometry(.018, .012, .26, 6), m, 0, .13, 0)); tail.rotation.x = -.5; G.add(tail);
+  G.scale.setScalar(1.7);
+  return { G, paw, tail, head };
+}
+function makeMole() {
   const G = new THREE.Group(); scene.add(G);
-  const b = mesh(new THREE.SphereGeometry(.22, 16, 12), M.black); b.scale.set(.8, .8, 1.5); G.add(b);
-  G.add(mesh(new THREE.SphereGeometry(.13, 12, 10), M.black, 0, .12, .3));
+  const dirt = new THREE.MeshStandardMaterial({ color: 0x6b4a2c, roughness: 1 });
+  const mound = mesh(new THREE.SphereGeometry(.55, 16, 8, 0, Math.PI * 2, 0, Math.PI / 2), dirt); mound.scale.y = .45; G.add(mound);
+  const head = new THREE.Group(); G.add(head);
+  head.add(mesh(new THREE.SphereGeometry(.2, 16, 12), new THREE.MeshStandardMaterial({ color: 0x3a2e28, roughness: .8 })));
+  head.add(mesh(new THREE.SphereGeometry(.05, 8, 6), new THREE.MeshStandardMaterial({ color: 0xf08a9a }), 0, .02, .19));
+  for (const sd of [-1, 1]) { const h = mesh(new THREE.BoxGeometry(.12, .03, .1), new THREE.MeshStandardMaterial({ color: 0xe8b8a8 }), sd * .2, -.05, .1); head.add(h); }
+  return { G, head };
+}
+function makeScooter() {
+  const G = new THREE.Group(); scene.add(G);
+  G.add(mesh(new THREE.BoxGeometry(.45, .35, 1.2), M.red, 0, .45, 0));
+  G.add(mesh(new THREE.BoxGeometry(.4, .7, .12), M.red, 0, .75, .55));
+  G.add(mesh(new THREE.BoxGeometry(.6, .05, .05), M.metal, 0, 1.12, .55));
+  G.add(mesh(new THREE.BoxGeometry(.5, .35, .4), M.white, 0, .8, -.55));
+  const wheels = [];
+  for (const z of [-.5, .55]) { const w = mesh(new THREE.TorusGeometry(.2, .08, 8, 18), M.black, 0, .25, z); w.rotation.y = Math.PI / 2; G.add(w); wheels.push(w); }
+  return { G, wheels };
+}
+function makeCrow(mat = M.black, sc = 1.8) {
+  const G = new THREE.Group(); scene.add(G);
+  const b = mesh(new THREE.SphereGeometry(.22, 16, 12), mat); b.scale.set(.8, .8, 1.5); G.add(b);
+  G.add(mesh(new THREE.SphereGeometry(.13, 12, 10), mat, 0, .12, .3));
   const bk = mesh(new THREE.ConeGeometry(.04, .16, 8), M.dark, 0, .1, .46); bk.rotation.x = Math.PI / 2; G.add(bk);
   const wings = [];
-  for (const sd of [-1, 1]) { const w = new THREE.Group(); w.position.set(sd * .12, .06, 0); const s = mesh(new THREE.BoxGeometry(.75, .02, .35), M.black, sd * .38, 0, 0); w.add(s); G.add(w); wings.push(w); }
+  for (const sd of [-1, 1]) { const w = new THREE.Group(); w.position.set(sd * .12, .06, 0); const s = mesh(new THREE.BoxGeometry(.75, .02, .35), mat, sd * .38, 0, 0); w.add(s); G.add(w); wings.push(w); }
   const claw = new THREE.Group(); claw.position.set(0, -.3, 0); G.add(claw);
-  G.scale.setScalar(1.8);
+  G.scale.setScalar(sc);
   return { G, wings, claw };
 }
 function makeUfo() {
@@ -604,7 +870,7 @@ function prop(kind) {
 const actors = [];
 function addActor(o) { actors.push(o); return o; }
 function clearActors() {
-  for (const a of actors) { scene.remove(a.G); a.G.traverse(x => { if (x.geometry) x.geometry.dispose(); }); }
+  for (const a of actors) { if (a.G.parent) a.G.parent.remove(a.G); a.G.traverse(x => { if (x.geometry) x.geometry.dispose(); }); }
   actors.length = 0;
 }
 
@@ -720,6 +986,406 @@ function flash(v = .6) { const f = $('#flash'); f.style.transition = 'none'; f.s
 const _a = V(), _b = V(), _c = V();
 function ball(P, t, out) { return out.set(RX, RY + P.vy * t - GR * t * t / 2, RZ + P.vz * t); }
 function arc(out, A, B, u, h) { out.lerpVectors(A, B, u); out.y += 4 * h * u * (1 - u); return out; }
+/* ===================== 大量の帰り方：登場するものを組み立てる ===================== */
+const MC = {};
+const mc = c => MC[c] || (MC[c] = new THREE.MeshStandardMaterial({ color: c, roughness: .55 }));
+function partsTo(G, list) {
+  for (const q of list) {
+    const [sh, a, b, c, col, x = 0, y = 0, z = 0, rx = 0, ry = 0, rz = 0] = q; let g;
+    if (sh === 'b') g = new THREE.BoxGeometry(a, b, c);
+    else if (sh === 'c') g = new THREE.CylinderGeometry(a, b, c, 18);
+    else if (sh === 's') g = new THREE.SphereGeometry(a, 18, 12);
+    else if (sh === 'o') g = new THREE.ConeGeometry(a, b, 18);
+    else if (sh === 't') g = new THREE.TorusGeometry(a, b, 8, 24, c || Math.PI * 2);
+    else g = new THREE.CapsuleGeometry(a, b, 6, 14);
+    const m = mesh(g, mc(col), x, y, z); m.rotation.set(rx, ry, rz);
+    if (sh === 's' && c) m.scale.set(1, c, 1);
+    G.add(m);
+  }
+  return G;
+}
+const PI = Math.PI;
+const THINGS = {
+  scarecrow: () => [['c', .05, .05, 1.8, 0x8a6a3a, 0, .9, 0], ['c', .04, .04, 1.4, 0x8a6a3a, 0, 1.35, 0, 0, 0, PI / 2], ['b', .5, .5, .15, 0x5070b0, 0, 1.35, 0], ['s', .18, 0, 1, 0xf0e0b0, 0, 1.85, 0], ['o', .32, .25, 0xd0b040, 0, 2.05, 0]],
+  statue: () => [['b', .7, .8, .7, 0x9a9a90, 0, .4, 0], ['p', .18, .5, 0x6a5a3a, 0, 1.25, 0], ['s', .13, 0, 1, 0x6a5a3a, 0, 1.75, 0], ['b', .25, .18, .05, 0x6a5a3a, 0, 1.45, .2], ['b', .4, .6, .15, 0x5a4a2a, 0, 1.3, -.18]],
+  vending: () => [['b', 1, 1.9, .75, 0xc83030, 0, .95, 0], ['b', .8, .8, .02, 0x223040, 0, 1.3, .38], ['b', .3, .15, .05, 0x202020, 0, .35, .38]],
+  postbox: () => [['c', .25, .25, 1.1, 0xd02020, 0, .55, 0], ['s', .25, 0, .4, 0xd02020, 0, 1.1, 0], ['b', .3, .04, .05, 0x202020, 0, .85, .25]],
+  pole: () => [['c', .15, .18, 9, 0x9a958a, 0, 4.5, 0], ['b', 1.2, .12, .12, 0x6a6a60, 0, 8.2, 0]],
+  gong: () => [['c', .04, .04, 2.2, 0x6a3a20, -.8, 1.1, 0], ['c', .04, .04, 2.2, 0x6a3a20, .8, 1.1, 0], ['c', .04, .04, 1.7, 0x6a3a20, 0, 2.2, 0, 0, 0, PI / 2], ['c', .7, .7, .06, 0xc89a30, 0, 1.35, 0, PI / 2]],
+  bell: () => [['c', .06, .06, 3.2, 0x5a3a20, -1.1, 1.6, 0], ['c', .06, .06, 3.2, 0x5a3a20, 1.1, 1.6, 0], ['b', 2.6, .25, .6, 0x4a3020, 0, 3.25, 0], ['c', .5, .75, 1.4, 0x6a7a5a, 0, 2.3, 0]],
+  mirror: () => [['b', 2.6, 3.2, .08, 0x8a6a3a, 0, 1.6, -.06], ['b', 2.4, 3, .1, 0xdfefff, 0, 1.6, 0]],
+  spring: () => [['b', .7, .08, .7, 0x606060, 0, .04, 0], ...[0, 1, 2, 3, 4, 5].map(i => ['t', .3, .045, 0, 0xa8a8b0, 0, .14 + i * .13, 0, PI / 2]), ['b', .7, .08, .7, 0xd03030, 0, .95, 0]],
+  bouncy: () => [['b', 3, 1.2, 3, 0xe04060, 0, .6, 0], ['c', .4, .4, 1.6, 0xf0d020, -1.3, 1.8, -1.3], ['c', .4, .4, 1.6, 0x30a0e0, 1.3, 1.8, -1.3], ['c', .4, .4, 1.6, 0x40c060, -1.3, 1.8, 1.3], ['c', .4, .4, 1.6, 0xf08020, 1.3, 1.8, 1.3]],
+  jelly: () => [['c', 1.1, 1.4, 1.5, 0xf0c060, 0, .75, 0], ['c', 1.1, 1.1, .16, 0x7a3a10, 0, 1.55, 0], ['c', 1.6, 1.6, .06, 0xf8f8f8, 0, .03, 0]],
+  mattress: () => [['b', 1.6, 2, .3, 0xf0f0f8, 0, 1.1, 0], ['b', 1.4, .05, .32, 0x9ab0d0, 0, 1.6, 0]],
+  tires: () => [0, 1, 2, 3].map(i => ['t', .4, .16, 0, 0x202022, 0, .16 + i * .3, 0, PI / 2]),
+  bumper: () => [['c', .6, .6, .6, 0xf03080, 0, .3, 0], ['c', .65, .65, .12, 0xffffff, 0, .55, 0], ['c', .4, .4, .2, 0xffe030, 0, .66, 0]],
+  fridge: () => [['b', .8, 1.8, .7, 0xf0f0f0, 0, .9, 0], ['b', .04, .5, .05, 0x9a9a9a, .3, 1.3, .37], ['b', .8, .02, .71, 0xc0c0c0, 0, 1.1, 0]],
+  piano: () => [['b', 1.5, 1, .65, 0x111114, 0, .75, 0], ['b', 1.5, .12, .4, 0xf8f8f8, 0, .95, .45], ['c', .05, .05, .5, 0x111114, -.6, .25, 0], ['c', .05, .05, .5, 0x111114, .6, .25, 0]],
+  safe: () => [['b', .9, .9, .8, 0x3a3e44, 0, .45, 0], ['c', .12, .12, .05, 0xc0c0c0, 0, .5, .42, PI / 2]],
+  anvil: () => [['b', .7, .25, .35, 0x2a2a2e, 0, .45, 0], ['b', .3, .3, .25, 0x2a2a2e, 0, .2, 0], ['b', .5, .1, .35, 0x2a2a2e, 0, .05, 0], ['o', .15, .3, 0x2a2a2e, .48, .45, 0, 0, 0, -PI / 2]],
+  tree: () => [['c', .15, .22, 2.4, 0x7a5a3a, 0, 1.2, 0], ['s', 1.1, 0, 1, 0x3d7a2e, 0, 2.8, 0], ['c', .05, .05, 1.6, 0x7a5a3a, 0, 1.7, .5, 1.1, 0, 0]],
+  bamboo: () => [-.5, -.2, .15, .45].map((x, i) => ['c', .07, .07, 5, 0x5aa040, x, 2.5, (i % 2) * .3 - .15, 0, 0, (i - 1.5) * .05]),
+  dish: () => [['c', .08, .1, 2, 0xb0b0b0, 0, 1, 0], ['s', 1.2, 0, .35, 0xe8e8e8, 0, 2.1, .2, -1.1]],
+  billboard: () => [['c', .1, .1, 4, 0x707070, -1.2, 2, 0], ['c', .1, .1, 4, 0x707070, 1.2, 2, 0], ['b', 3.2, 1.6, .1, 0xf0d020, 0, 3.4, 0], ['b', 2.8, .5, .12, 0xd03020, 0, 3.4, 0]],
+  snowman: () => [['s', .5, 0, 1, 0xffffff, 0, .45, 0], ['s', .35, 0, 1, 0xffffff, 0, 1.15, 0], ['o', .05, .25, 0xf08020, 0, 1.15, .4, PI / 2], ['c', .25, .25, .3, 0x202020, 0, 1.6, 0]],
+  duck: () => [['s', .9, 0, .8, 0xf8d830, 0, .75, 0], ['s', .5, 0, 1, 0xf8d830, 0, 1.6, .5], ['o', .18, .4, 0xf08020, 0, 1.55, 1.05, PI / 2]],
+  maneki: () => [['s', .8, 0, 1.1, 0xffffff, 0, .9, 0], ['s', .6, 0, 1, 0xffffff, 0, 2.0, 0], ['o', .18, .35, 0xffffff, -.35, 2.6, 0], ['o', .18, .35, 0xffffff, .35, 2.6, 0], ['p', .15, .4, 0xffffff, .65, 2.4, .2], ['c', .3, .3, .08, 0xf0c020, 0, 1.4, .78, PI / 2], ['t', .45, .05, 0, 0xd02020, 0, 1.55, 0, PI / 2]],
+  komainu: () => [['b', .9, .5, .9, 0x9a9890, 0, .25, 0], ['s', .4, 0, 1.1, 0x8a8880, 0, .95, 0], ['s', .3, 0, 1, 0x8a8880, 0, 1.45, .15]],
+  jizo: () => [['c', .25, .3, .8, 0x9a9890, 0, .4, 0], ['s', .22, 0, 1, 0x9a9890, 0, .95, 0], ['b', .4, .25, .05, 0xd02020, 0, .7, .25]],
+  koban: () => [['b', 3, 2.6, 2.4, 0xe0d8c8, 0, 1.3, 0], ['o', 2.4, .8, 0x6a3a2a, 0, 3, 0, 0, PI / 4], ['s', .2, 0, 1, 0xff2020, 0, 2.7, 1.25]],
+  cones: () => [-.6, 0, .6].map(x => ['o', .18, .6, 0xf06020, x, .3, 0]),
+  mushroom: () => [['c', .3, .4, 1.2, 0xf6f0e0, 0, .6, 0], ['s', 1.1, 0, .55, 0xd03030, 0, 1.3, 0], ['s', .18, 0, .4, 0xffffff, .4, 1.75, .3], ['s', .15, 0, .4, 0xffffff, -.4, 1.7, -.3]],
+  torii: () => [['c', .18, .2, 4, 0xd03a20, -1.6, 2, 0], ['c', .18, .2, 4, 0xd03a20, 1.6, 2, 0], ['b', 4.6, .3, .35, 0x202020, 0, 4.1, 0], ['b', 4, .25, .3, 0xd03a20, 0, 3.4, 0]],
+  goalpost: () => [['c', .07, .07, 2.4, 0xffffff, -2.5, 1.2, 0], ['c', .07, .07, 2.4, 0xffffff, 2.5, 1.2, 0], ['c', .07, .07, 5, 0xffffff, 0, 2.4, 0, 0, 0, PI / 2]],
+  hoop: () => [['c', .08, .08, 3, 0x707070, 0, 1.5, -.6], ['b', 1.8, 1.1, .06, 0xffffff, 0, 3.2, 0], ['t', .23, .02, 0, 0xf06020, 0, 2.9, .3, PI / 2]],
+  volcano: () => [['o', 1.6, 1.6, 0x6a4a3a, 0, .8, 0], ['c', .4, .4, .05, 0xff5020, 0, 1.6, 0]],
+  hydrant: () => [['c', .18, .2, .8, 0xd02020, 0, .4, 0], ['s', .2, 0, .8, 0xd02020, 0, .82, 0], ['c', .07, .07, .5, 0xd02020, 0, .55, 0, 0, 0, PI / 2]],
+  manhole: () => [['c', .5, .5, .06, 0x3a3a3a, 0, .04, 0]],
+  jackbox: () => [['b', .8, .8, .8, 0xd04080, 0, .4, 0], ['b', .82, .1, .82, 0xf0d020, 0, .85, 0]],
+  toaster: () => [['b', 1.6, 1, 1, 0xc0c4c8, 0, .5, 0], ['b', .25, .05, .7, 0x202020, -.35, 1.0, 0], ['b', .25, .05, .7, 0x202020, .35, 1.0, 0]],
+  takenoko: () => [['o', .4, 1.6, 0x9a7a40, 0, .8, 0], ['o', .3, .6, 0x7a9a30, 0, 1.7, 0]],
+  worm: () => [['p', .25, 2.2, 0xd08a8a, 0, 1.3, 0]],
+  seesaw: () => [['o', .25, .5, 0x707070, 0, .25, 0, 0, PI / 4], ['b', .3, .1, 4, 0xe0b040, 0, .55, 0, .25]],
+  catapult: () => [['b', 1.2, .4, 1.6, 0x7a5a3a, 0, .3, 0], ['b', .15, 1.5, .15, 0x7a5a3a, 0, 1.0, -.3, -.6], ['c', .25, .25, .2, 0x5a3a2a, 0, 1.6, -.9]],
+  cannon: () => [['c', .35, .45, 2, 0x2a2a2e, 0, .9, -.3, -.8], ['t', .5, .1, 0, 0x7a5a3a, -.5, .5, 0, 0, PI / 2], ['t', .5, .1, 0, 0x7a5a3a, .5, .5, 0, 0, PI / 2]],
+  popcorn: () => [['b', 1, 1.4, 1, 0xd02020, 0, .7, 0], ['b', .9, .8, .9, 0xf0f0e0, 0, 1.6, 0]],
+  fountain: () => [['c', 1.2, 1.3, .4, 0xb0b0b0, 0, .2, 0], ['c', .15, .15, .8, 0xb0b0b0, 0, .6, 0]],
+  penguin: () => [['s', .25, 0, 1.5, 0x1a1a22, 0, .4, 0], ['s', .17, 0, 1.3, 0xffffff, 0, .38, .1], ['s', .15, 0, 1, 0x1a1a22, 0, .78, 0], ['o', .04, .12, 0xf0a020, 0, .76, .17, PI / 2]],
+  crab: () => [['s', .35, 0, .5, 0xd03020, 0, .3, 0], ['s', .12, 0, 1, 0xd03020, -.45, .4, .25], ['s', .12, 0, 1, 0xd03020, .45, .4, .25]],
+  ants: () => Array.from({ length: 12 }, (_, i) => ['s', .05, 0, 1, 0x111111, ((i * 7) % 5 - 2) * .08, .05, -.5 + i * .09]),
+  tortoise: () => [['s', .45, 0, .5, 0x5a7a3a, 0, .3, 0], ['s', .14, 0, 1, 0x8a9a5a, 0, .3, .5]],
+};
+const QUADS = {
+  horse: { c: 0x8b5a2b, L: 1.5, H: 1.15, nk: .7, hs: .17, ear: 'p', tail: 'l', snout: 1 },
+  cow: { c: 0xf2f2f2, c2: 0x222222, L: 1.5, H: 1.0, nk: .2, hs: .24, horn: 1, tail: 'l', snout: 1 },
+  pig: { c: 0xf4a6b0, L: .9, H: .5, hs: .2, ear: 'r', tail: 'c', snout: 1 },
+  sheep: { c: 0xf5f2e8, L: .9, H: .6, hs: .15, ear: 'r', fluff: 1 },
+  deer: { c: 0xb07a45, L: 1.0, H: .9, nk: .45, hs: .14, ear: 'p', antler: 1, tail: 's' },
+  boar: { c: 0x5a4030, L: 1.1, H: .6, hs: .22, ear: 'p', tusk: 1, snout: 1 },
+  bear: { c: 0x3a2a20, L: 1.3, H: .8, hs: .27, ear: 'r', r: .35 },
+  panda: { c: 0xf5f5f0, c2: 0x161616, L: 1.2, H: .7, hs: .27, ear: 'r', r: .33 },
+  tanuki: { c: 0x8a6a4a, c2: 0x2a2018, L: .7, H: .4, hs: .16, ear: 'r', tail: 'l' },
+  fox: { c: 0xe07a30, L: .8, H: .45, hs: .13, ear: 'p', tail: 'l', snout: 1 },
+  catq: { c: 0xe8a050, L: .5, H: .3, hs: .1, ear: 'p', tail: 'l' },
+  ostrich: { c: 0x3a3330, L: .7, H: 1.2, nk: 1.0, hs: .1, r: .35, tail: 's' },
+  kangaroo: { c: 0xb88050, L: .8, H: .9, nk: .3, hs: .14, ear: 'l', tail: 'l' },
+  camel: { c: 0xc8a060, L: 1.6, H: 1.5, nk: .7, hs: .17, hump: 1, snout: 1 },
+  lion: { c: 0xd0a050, c2: 0x8a5a20, L: 1.4, H: .85, hs: .22, mane: 1, tail: 'l' },
+  cheetah: { c: 0xe0b060, L: 1.2, H: .8, hs: .14, ear: 'r', tail: 'l', r: .2 },
+  chihuahua: { c: 0xd8b080, L: .35, H: .22, hs: .1, ear: 'p', tail: 's' },
+  rabbit: { c: 0xf5f5f5, L: .4, H: .25, hs: .11, ear: 'l', tail: 's' },
+  frog: { c: 0x4aa040, L: .35, H: .15, hs: .12, r: .14 },
+  elephant: { c: 0x8a8e94, L: 2.2, H: 1.7, hs: .5, ear: 'big', trunk: 1, r: .7 },
+  giraffe: { c: 0xe0b050, L: 1.4, H: 1.7, nk: 1.9, hs: .18, ear: 'p', horn: 1, r: .38 },
+};
+function makeQuad(o) {
+  const G = new THREE.Group(); scene.add(G); const m = mc(o.c), m2 = mc(o.c2 ?? o.c);
+  const L = o.L, H = o.H, r = o.r ?? Math.max(.08, H * .3);
+  const body = mesh(new THREE.CapsuleGeometry(r, L * .7, 6, 14), m, 0, H * .72, 0); body.rotation.x = PI / 2; G.add(body);
+  if (o.fluff) body.scale.set(1.35, 1, 1.35);
+  if (o.hump) G.add(mesh(new THREE.SphereGeometry(r * .8, 12, 8), m, 0, H * .72 + r * .9, 0));
+  const neck = new THREE.Group(); neck.position.set(0, H * .78, L * .45); G.add(neck);
+  if (o.nk) { neck.add(mesh(new THREE.CylinderGeometry(r * .3, r * .45, o.nk, 10), m, 0, o.nk / 2, 0)); neck.rotation.x = .3; }
+  const head = new THREE.Group(); head.position.set(0, o.nk || 0, o.nk ? 0 : r * .5); neck.add(head);
+  const hs = o.hs; head.add(mesh(new THREE.SphereGeometry(hs, 14, 10), m));
+  if (o.snout) head.add(mesh(new THREE.BoxGeometry(hs * .8, hs * .7, hs * 1.3), m, 0, -hs * .25, hs * .9));
+  if (o.ear === 'p') for (const sd of [-1, 1]) head.add(mesh(new THREE.ConeGeometry(hs * .3, hs * .7, 6), o.c2 ? m2 : m, sd * hs * .55, hs * .85, 0));
+  if (o.ear === 'r') for (const sd of [-1, 1]) head.add(mesh(new THREE.SphereGeometry(hs * .32, 8, 6), m2, sd * hs * .7, hs * .75, 0));
+  if (o.ear === 'l') for (const sd of [-1, 1]) head.add(mesh(new THREE.BoxGeometry(hs * .3, hs * 1.6, hs * .15), m, sd * hs * .35, hs * 1.4, 0));
+  if (o.ear === 'big') for (const sd of [-1, 1]) { const e = mesh(new THREE.BoxGeometry(hs * .1, hs * 1.4, hs * 1.2), m, sd * hs * .95, 0, -hs * .2); head.add(e); }
+  if (o.horn) for (const sd of [-1, 1]) head.add(mesh(new THREE.ConeGeometry(hs * .12, hs * .6, 6), mc(0xe8e0c8), sd * hs * .45, hs * .95, 0));
+  if (o.antler) for (const sd of [-1, 1]) { const a = mesh(new THREE.CylinderGeometry(.02, .025, .45, 5), mc(0x7a5a3a), sd * .1, hs + .2, 0); a.rotation.z = -sd * .5; head.add(a); }
+  if (o.tusk) for (const sd of [-1, 1]) head.add(mesh(new THREE.ConeGeometry(.025, .12, 5), mc(0xf0e8d8), sd * hs * .4, -hs * .3, hs * 1.4));
+  if (o.mane) { const mn = mesh(new THREE.SphereGeometry(hs * 1.6, 14, 10), m2, 0, 0, -hs * .4); head.add(mn); }
+  let trunk = null;
+  if (o.trunk) { trunk = new THREE.Group(); trunk.position.set(0, -hs * .2, hs * .85); trunk.add(mesh(new THREE.CylinderGeometry(hs * .14, hs * .25, hs * 2.2, 10), m, 0, -hs * 1.1, 0)); trunk.rotation.x = .25; head.add(trunk); }
+  if (o.c2 && o.c !== o.c2 && !o.mane && o.ear === 'r') for (const sd of [-1, 1]) head.add(mesh(new THREE.SphereGeometry(hs * .22, 8, 6), m2, sd * hs * .4, hs * .1, hs * .8));
+  const mouth = new THREE.Group(); mouth.position.set(0, -hs * .55, hs * (o.snout ? 1.6 : 1.05)); head.add(mouth);
+  if (trunk) { trunk.add(mouth); mouth.position.set(0, -hs * 2.2, 0); }
+  const legs = [];
+  for (const [x, z] of [[-1, 1], [1, 1], [-1, -1], [1, -1]]) { const l = new THREE.Group(); l.position.set(x * r * .55, H * .62, z * L * .33); l.add(mesh(new THREE.CylinderGeometry(r * .22, r * .18, H * .62, 8), o.c2 && o.ear === 'r' && !o.mane ? m2 : m, 0, -H * .31, 0)); G.add(l); legs.push(l); }
+  let tail = null;
+  if (o.tail) { tail = new THREE.Group(); tail.position.set(0, H * .78, -L * .5); tail.add(mesh(new THREE.CylinderGeometry(r * .1, r * .06, o.tail === 'l' ? L * .45 : L * .15, 6), m, 0, o.tail === 'l' ? L * .22 : L * .07, 0)); tail.rotation.x = -.8; G.add(tail); }
+  return { G, legs, head, mouth, tail, neck, trunk, top: H * .72 + r };
+}
+function makeVeh(k, c) {
+  const G = new THREE.Group(); scene.add(G); const wheels = []; let top = 1.4;
+  const wheel = (x, y, z, r = .32) => { const w = mesh(new THREE.TorusGeometry(r, r * .38, 8, 18), mc(0x18181a), x, y, z); w.rotation.y = PI / 2; G.add(w); wheels.push(w); };
+  if (k === 'car' || k === 'police' || k === 'taxi') {
+    const col = k === 'police' ? 0x161616 : k === 'taxi' ? 0xf0c020 : c;
+    partsTo(G, [['b', 1.8, .6, 3.6, col, 0, .62, 0], ['b', 1.6, .55, 1.8, 0x9ac0d8, 0, 1.18, -.2]]);
+    if (k === 'police') partsTo(G, [['b', 1.82, .3, 3.62, 0xf6f6f6, 0, .95, 0], ['b', .5, .12, .25, 0xff2020, -.3, 1.52, -.2], ['b', .5, .12, .25, 0x2050ff, .3, 1.52, -.2]]);
+    if (k === 'taxi') partsTo(G, [['b', .5, .2, .25, 0xf6f6f6, 0, 1.55, -.2]]);
+    for (const x of [-.9, .9]) for (const z of [-1.2, 1.2]) wheel(x, .32, z);
+    top = 1.55;
+  } else if (k === 'bus') { partsTo(G, [['b', 2.4, 2.6, 9, c, 0, 1.6, 0], ['b', 2.42, .7, 8, 0x9ac0d8, 0, 2.2, 0]]); for (const x of [-1.2, 1.2]) for (const z of [-3, 3]) wheel(x, .45, z, .45); top = 3; }
+  else if (k === 'truck') { partsTo(G, [['b', 2.2, 2, 1.8, 0xe0e0e0, 0, 1.3, 3], ['b', 2.1, .6, .05, 0x9ac0d8, 0, 1.8, 3.92], ['b', 2.4, 2.6, 6, c, 0, 1.8, -1]]); for (const x of [-1.1, 1.1]) for (const z of [-3, 0, 3]) wheel(x, .45, z, .45); top = 3.2; }
+  else if (k === 'train') { partsTo(G, [['b', 2.8, 3, 14, c, 0, 1.9, 0], ['b', 2.82, .3, 14, 0x2a8a3a, 0, 1.4, 0], ['b', 2.84, .8, 12, 0x9ac0d8, 0, 2.4, 0]]); top = 3.5; }
+  else if (k === 'van') { partsTo(G, [['b', 1.9, 1.9, 4.2, c, 0, 1.25, 0], ['b', 1.8, .6, .05, 0x9ac0d8, 0, 1.6, 2.1], ['b', .8, .2, .2, 0xd02020, 0, 2.3, 1.2]]); for (const x of [-.95, .95]) for (const z of [-1.4, 1.4]) wheel(x, .35, z, .35); top = 2.3; }
+  else if (k === 'scooter') { partsTo(G, [['b', .45, .35, 1.2, c, 0, .45, 0], ['b', .4, .7, .12, c, 0, .75, .55], ['b', .6, .05, .05, 0xb0b0b0, 0, 1.12, .55], ['b', .5, .4, .45, 0xf0f0f0, 0, .85, -.55]]); wheel(0, .25, -.5, .22); wheel(0, .25, .55, .22); top = 1.1; }
+  else if (k === 'bike') { partsTo(G, [['c', .03, .03, 1.1, 0xb0b0b8, 0, .65, 0, PI / 2 - .2], ['c', .03, .03, .6, 0xb0b0b8, 0, .75, .5], ['b', .5, .04, .04, 0x202020, 0, 1.05, .5], ['b', .35, .25, .3, 0xd0d0d0, 0, .95, .65]]); wheel(0, .33, -.5, .33); wheel(0, .33, .5, .33); top = 1.15; }
+  else if (k === 'roomba') { partsTo(G, [['c', .35, .35, .1, 0x2a2a2e, 0, .07, 0], ['c', .12, .12, .02, 0x50ff80, 0, .13, .1]]); top = .14; }
+  else if (k === 'robot') { partsTo(G, [['b', .6, .5, .7, 0xf2f2f2, 0, .45, 0], ['b', .62, .06, .72, 0x2a2a2e, 0, .72, 0], ['c', .01, .01, 1, 0xd0d0d0, .25, 1.2, -.3], ['b', .25, .15, .01, 0xf06020, .37, 1.6, -.3]]); for (const x of [-.32, .32]) for (const z of [-.25, 0, .25]) wheel(x, .1, z, .08); top = .78; }
+  else if (k === 'cart') { partsTo(G, [['b', .6, .5, .9, 0xb8bcc0, 0, .75, 0], ['b', .62, .03, .03, 0xd03030, 0, 1.0, -.5], ['c', .02, .02, .5, 0x909090, 0, .3, 0]]); for (const x of [-.25, .25]) for (const z of [-.35, .35]) wheel(x, .08, z, .07); top = 1.0; }
+  else if (k === 'tractor') { partsTo(G, [['b', 1.3, .8, 2, c, 0, .9, .3], ['b', 1.1, 1.1, .9, 0x9ac0d8, 0, 1.75, -.3], ['c', .06, .06, .8, 0x303030, .4, 1.6, .9]]); wheel(-.8, .6, -.5, .6); wheel(.8, .6, -.5, .6); wheel(-.7, .35, 1, .32); wheel(.7, .35, 1, .32); top = 2.4; }
+  else if (k === 'forklift') { partsTo(G, [['b', 1.2, 1, 1.8, 0xf0a020, 0, .8, 0], ['b', 1, .08, 1, 0x303030, 0, 2.1, -.2], ['c', .05, .05, 2.4, 0x303030, -.4, 1.2, 1.0], ['c', .05, .05, 2.4, 0x303030, .4, 1.2, 1.0], ['b', .9, .06, .9, 0x606060, 0, .5, 1.4]]); for (const x of [-.6, .6]) for (const z of [-.6, .6]) wheel(x, .3, z, .28); top = .6; }
+  else if (k === 'kart') { partsTo(G, [['b', 1.1, .3, 1.8, c, 0, .3, 0], ['b', .5, .5, .4, 0x202020, 0, .6, -.3]]); for (const x of [-.6, .6]) for (const z of [-.7, .7]) wheel(x, .2, z, .2); top = .9; }
+  else if (k === 'stroller') { partsTo(G, [['b', .5, .35, .7, 0x3a5a9a, 0, .65, 0], ['s', .4, 0, .8, 0x3a5a9a, 0, .85, -.2, 0, 0, 0], ['c', .02, .02, .8, 0xc0c0c0, 0, .9, -.55, .6]]); for (const x of [-.25, .25]) for (const z of [-.3, .3]) wheel(x, .12, z, .11); top = .95; }
+  return { G, wheels, top };
+}
+function makeFly(k, c) {
+  const G = new THREE.Group(); scene.add(G); const spin = []; let off = .5; let P2 = null;
+  if (k === 'drone') { partsTo(G, [['b', .45, .14, .45, c, 0, 0, 0], ['b', 1.1, .04, .06, 0x303030, 0, .02, 0, 0, PI / 4], ['b', 1.1, .04, .06, 0x303030, 0, .02, 0, 0, -PI / 4]]); for (const [x, z] of [[-.4, -.4], [.4, -.4], [-.4, .4], [.4, .4]]) { const r = mesh(new THREE.BoxGeometry(.4, .01, .05), mc(0x202020), x, .08, z); G.add(r); spin.push(r); } off = .3; }
+  else if (k === 'heli') { partsTo(G, [['p', .8, 1.6, c, 0, 0, 0, PI / 2], ['b', .12, .12, 3, c, 0, .2, -2.2], ['b', .05, .05, 1.5, 0x202020, -.5, -.9, 0], ['b', .05, .05, 1.5, 0x202020, .5, -.9, 0], ['c', .015, .015, 3, 0x303030, 0, -2.4, 0]]); const r = mesh(new THREE.BoxGeometry(6, .05, .25), mc(0x202020), 0, .95, 0); G.add(r); spin.push(r); off = 4.0; }
+  else if (k === 'balloon') { partsTo(G, [['s', 2.2, 0, 1.15, c, 0, 3.6, 0], ['b', .9, .6, .9, 0x8a6a3a, 0, .3, 0], ['c', .01, .01, 2, 0x333333, -.4, 1.4, 0], ['c', .01, .01, 2, 0x333333, .4, 1.4, 0]]); off = -.05; }
+  else if (k === 'blimp') { partsTo(G, [['p', 1.8, 7, c, 0, 0, 0, PI / 2], ['b', 1, .6, 2, 0x707070, 0, -1.9, 0], ['b', .1, 1.6, 1.2, c, 0, 1, -5]]); off = 2.4; }
+  else { // broom / hero / angel: 人が飛ぶ
+    P2 = makePerson({ mat: k === 'angel' ? mc(0xffffff) : k === 'hero' ? mc(0x2a5ab0) : mc(0x1a1a22) }); scene.remove(P2.G); G.add(P2.G);
+    if (k === 'broom') { crouch(P2, .6); P2.G.position.y = -.6; partsTo(G, [['c', .03, .03, 1.8, 0x8a6a3a, 0, -.15, 0, PI / 2], ['o', .15, .4, 0xc8a050, 0, -.15, -1.05, -PI / 2], ['o', .25, .5, 0x1a1a22, 0, 1.02, 0]]); off = .8; }
+    if (k === 'hero') { P2.G.rotation.x = PI / 2; P2.G.position.set(0, .25, -.9); P2.R.sh.rotation.x = P2.L.sh.rotation.x = -3; partsTo(G, [['b', .6, .02, 1.0, c, 0, .48, -.6]]); off = .45; }
+    if (k === 'angel') { P2.G.position.y = -1.0; partsTo(G, [['b', .05, .8, .5, 0xffffff, -.4, .3, -.2, 0, -.5], ['b', .05, .8, .5, 0xffffff, .4, .3, -.2, 0, .5], ['t', .14, .02, 0, 0xf0d040, 0, .9, 0, PI / 2]]); P2.R.sh.rotation.x = P2.L.sh.rotation.x = -1.2; off = .2; }
+  }
+  return { G, spin, off, P2 };
+}
+const PROPS = {
+  shinai: [.95, .018, 0xd8c890], sracket: [.35, .012, 0xd0d0d0, ['t', .1, .01, 0, 0x2050c0]], paddle: [.12, .02, 0x8a6a3a, ['c', .09, .09, .02, 0xd02020]], cbat: [.85, .025, 0xd8c090, ['b', .1, .45, .04, 0xd8c090]],
+  hstick: [1.0, .02, 0x303030, ['b', .08, .05, .3, 0x303030]], pan: [.3, .02, 0x303030, ['c', .17, .14, .06, 0x2a2a2e]], swatter: [.4, .01, 0x30a050, ['b', .16, .18, .01, 0x30a050]], umbrella: [.85, .015, 0x303030, ['o', .12, .5, 0x2a3a6a]],
+  guitar: [.55, .03, 0x5a3a1a, ['b', .35, .4, .1, 0xd03020]], broom: [1.1, .02, 0x8a6a3a, ['b', .3, .2, .06, 0xc8a050]], baguette: [.05, .01, 0xd09a50, ['p', .05, .6, 0xd09a50]], hammer: [.35, .02, 0x8a6a3a, ['b', .16, .07, .07, 0x606060]],
+  katana: [1.0, .012, 0xd8d8e0], uchiwa: [.2, .012, 0xe0d0a0, ['c', .14, .14, .01, 0xe04060]], skate: [.05, .01, 0x303030, ['b', .22, .8, .03, 0x30a050]], surf: [.05, .01, 0xffffff, ['p', .22, 1.2, 0x30b0d0]],
+  baton: [.4, .006, 0xffffff], pointer: [.7, .008, 0xb08050], negi: [.6, .025, 0xf0f0e0, ['c', .025, .02, .3, 0x50a030]], tuna: [.05, .01, 0x405070, ['p', .14, .7, 0x405070]],
+  lax: [.9, .015, 0xe0e0e0, ['t', .1, .012, 0, 0x2050c0]], pillow: [.05, .01, 0xffffff, ['b', .45, .3, .12, 0xf0f0f8]], tray: [.05, .01, 0xc0c0c8, ['c', .22, .22, .02, 0xd0d0d8]], rod: [1.6, .01, 0x303030],
+  shield: [.05, .01, 0x303030, ['b', .7, 1.1, .03, 0xb8d0e8]],
+};
+function propX(kind) {
+  const d = PROPS[kind], g = new THREE.Group();
+  if (!d) return g;
+  g.add(mesh(new THREE.CylinderGeometry(d[1], d[1], d[0], 8), mc(d[2]), 0, -d[0] / 2, 0));
+  if (d[3]) { const h = new THREE.Group(); h.position.y = -d[0]; partsTo(h, [d[3].slice(0, 5).concat([0, d[3][0] === 'p' ? -.35 : -.1, 0, d[3][0] === 't' ? PI / 2 : 0])]); g.add(h); }
+  return g;
+}
+function makeA(spec) {
+  if (spec.p) {
+    const o = spec.p;
+    const P2 = makePerson({ mat: o.c != null ? mc(o.c) : M.body, cap: o.cap != null ? mc(o.cap) : null, w: o.w, bun: o.bun, belt: o.belt != null ? mc(o.belt) : null, handMat: o.handC != null ? mc(o.handC) : null, handScale: o.handScale });
+    if (o.s) P2.G.scale.setScalar(o.s);
+    let pr = null; if (o.prop) { pr = propX(o.prop); P2.R.hand.add(pr); }
+    return addActor({ k: 'p', G: P2.G, P: P2, pr, hold: out => handPos(P2.R, out), top: 1.9 * (o.s || 1) });
+  }
+  if (spec.q) { const Q = makeQuad(QUADS[spec.q]); return addActor({ k: 'q', G: Q.G, Q, hold: out => Q.mouth.getWorldPosition(out), top: Q.top }); }
+  if (spec.b) { const C = makeCrow(mc(spec.b.c), spec.b.sc); return addActor({ k: 'b', G: C.G, C, hold: out => C.claw.getWorldPosition(out), off: .3 * spec.b.sc }); }
+  if (spec.v) {
+    const Vh = makeVeh(spec.v.k, spec.v.c); let rider = null;
+    if (spec.rider) { rider = makePerson({ cap: spec.rider.cap != null ? mc(spec.rider.cap) : null, bun: spec.rider.bun }); scene.remove(rider.G); Vh.G.add(rider.G); if (spec.v.k === 'stroller') rider.G.position.set(0, 0, -1.0); else { rider.G.position.set(0, .35, -.1); crouch(rider, .55); rider.torso.rotation.x = .25; rider.R.sh.rotation.x = rider.L.sh.rotation.x = -1.2; } }
+    return addActor({ k: 'v', G: Vh.G, Vh, rider, hold: out => out.copy(Vh.G.position).add(_w2.set(0, Vh.top + .12, 0)), top: Vh.top });
+  }
+  if (spec.f) { const F = makeFly(spec.f.k, spec.f.c); return addActor({ k: 'f', G: F.G, F, off: F.off, noBlow: true, hold: out => out.copy(F.G.position).add(_w2.set(0, -F.off, 0)) }); }
+  const G = new THREE.Group(); scene.add(G); let top = .9;
+  if (spec.x && THINGS[spec.x]) { partsTo(G, THINGS[spec.x]()); const bb = new THREE.Box3().setFromObject(G); top = bb.max.y; }
+  return addActor({ k: 'x', G, hold: out => out.copy(G.position).add(_w2.set(0, top + .12, 0)), top });
+}
+const _w2 = new THREE.Vector3();
+function animA(A, mode, ph, amp, dt) {
+  if (A.k === 'p') { if (mode === 'walk' || mode === 'run') walk(A.P, ph, amp); }
+  else if (A.k === 'q') { const Q = A.Q; Q.legs.forEach((l, i) => l.rotation.x = Math.sin(ph + (i < 2 ? 0 : PI) + (i % 2) * .5) * amp * .9); if (Q.tail) Q.tail.rotation.z = Math.sin(ph * .7) * .4; }
+  else if (A.k === 'b') A.C.wings.forEach((w, i) => w.rotation.z = Math.sin(ph) * .6 * (i ? -1 : 1));
+  else if (A.k === 'v') A.Vh.wheels.forEach(w => w.rotation.x += dt * amp * 8);
+  else if (A.k === 'f') { A.F.spin.forEach(s => s.rotation.y += dt * 30); if (A.F.P2) A.F.P2.legs.forEach((l, i) => l.hip.rotation.x = Math.sin(ph * .3 + i) * .2); }
+}
+// 人の打ち方（k: 0=構え 0.5=当たる 1=振り抜き）
+function swingP(P2, st, k) {
+  const R = P2.R, L = P2.L, e = ease(clamp(k, 0, 1));
+  if (st === 'bat' || st === 'low') { P2.torso.rotation.y = lerp(1.1, -1.1, e); R.sh.rotation.x = st === 'low' ? -.5 : -1.35; R.sh.rotation.z = -.2; L.sh.rotation.x = st === 'low' ? -.5 : -1.3; L.sh.rotation.z = -.5; R.el.rotation.x = -.2; if (st === 'low') crouch(P2, .35); }
+  else if (st === 'over' || st === 'throw') { R.sh.rotation.x = lerp(2.7, -1.3, e); R.el.rotation.x = lerp(-1.2, -.1, e); P2.torso.rotation.x = lerp(-.15, .3, e); P2.torso.rotation.y = lerp(.4, -.3, e); L.sh.rotation.x = -.9; }
+  else if (st === 'kick') { P2.legs[1].hip.rotation.x = lerp(.7, -2.0, e); P2.legs[1].knee.rotation.x = lerp(1.2, 0, e); P2.torso.rotation.x = lerp(0, -.35, e); R.sh.rotation.z = -.8; L.sh.rotation.z = .8; }
+  else if (st === 'punch' || st === 'slap') { R.sh.rotation.x = lerp(-.4, -1.57, e); R.el.rotation.x = st === 'punch' ? lerp(-2, 0, e) : 0; R.sh.rotation.z = st === 'slap' ? lerp(-1.4, .2, e) : 0; P2.torso.rotation.y = lerp(.5, -.4, e); L.sh.rotation.x = -.6; L.el.rotation.x = -1.6; }
+  else if (st === 'push') { R.sh.rotation.x = L.sh.rotation.x = -1.5; R.el.rotation.x = L.el.rotation.x = 0; R.sh.rotation.z = -.15; L.sh.rotation.z = .15; P2.torso.rotation.x = k > .45 && k < .6 ? .15 : 0; }
+  else if (st === 'belly') { P2.torso.rotation.x = k > .4 && k < .65 ? -.25 : 0; R.sh.rotation.z = -.6; L.sh.rotation.z = .6; }
+  else if (st === 'put') { R.sh.rotation.x = lerp(-2.4, -1.9, e); R.el.rotation.x = lerp(-2.4, 0, e); P2.torso.rotation.y = lerp(1.0, -.6, e); crouch(P2, .3 * (1 - e)); }
+}
+// 動物の打ち方
+function swingQ(Q, st, k) { const e = Math.sin(clamp(k, 0, 1) * PI); Q.head.rotation.x = st === 'trunk' ? -e * .8 : e * .6; if (Q.trunk) Q.trunk.rotation.x = .25 - e * 1.8; if (st === 'toss' && Q.neck) Q.neck.rotation.x = .3 - e * 1.1; }
+function snd(n) {
+  const f = {
+    bat: sfx.bat, pock: sfx.pock, thud: sfx.thud, boing: sfx.boing, bonk: sfx.bonk, whoosh: sfx.whoosh, caw: sfx.caw,
+    clang: () => { tone(900, 850, .45, .25, 'triangle'); noise(.1, 3000, .2, 'highpass'); }, gong: () => { tone(180, 172, 1.6, .4); tone(270, 262, 1.4, .2); },
+    bell: () => { tone(440, 438, 1.8, .3); tone(880, 878, 1.2, .1); }, ding: () => tone(1320, 1320, .6, .2), ting: () => tone(2400, 2400, .3, .15),
+    slap: () => noise(.12, 2500, .5, 'bandpass', 1.5), swish: () => noise(.3, 2000, .25, 'bandpass', .7), clack: () => noise(.08, 3500, .4, 'bandpass', 3),
+    guitar: () => { tone(82, 82, 1.2, .3, 'sawtooth'); tone(123, 123, 1.2, .2, 'sawtooth'); }, piano: () => [261, 311, 370].forEach(x => tone(x, x, 1.5, .15, 'triangle')),
+    squeak: () => tone(1500, 2200, .25, .2, 'square'), siren: () => { tone(700, 1000, .5, .14); tone(1000, 700, .5, .14, 'sine', .5); }, honk: () => { tone(400, 400, .2, .2, 'square'); tone(400, 400, .2, .2, 'square', .25); },
+    beep: () => { tone(1800, 1800, .1, .15, 'square'); tone(1800, 1800, .1, .15, 'square', .15); }, neigh: () => tone(900, 500, .6, .2, 'sawtooth'), moo: () => tone(160, 120, .9, .3, 'sawtooth'),
+    oink: () => tone(300, 200, .2, .25, 'square'), baa: () => tone(500, 480, .6, .2, 'sawtooth'), growl: () => noise(.8, 300, .6), roar: () => { noise(1, 400, .6); tone(120, 80, .8, .3, 'sawtooth'); },
+    yip: () => tone(1200, 900, .1, .2, 'square'), meow: () => tone(700, 1000, .3, .2, 'triangle'), croak: () => tone(200, 180, .2, .3, 'square'), clatter: () => noise(.8, 3000, .25, 'bandpass', 3),
+    engine: () => tone(60, 80, 1.2, .25, 'sawtooth'), buzz: () => tone(200, 200, 1, .12, 'sawtooth'), boom2: () => { noise(1, 500, .7); tone(80, 30, .8, .6); }, splash: () => noise(1.4, 1200, .4, 'highpass'),
+    pop: () => tone(400, 1200, .08, .3, 'square'), squish: () => tone(300, 120, .3, .25), trumpet: () => tone(500, 700, .6, .25, 'sawtooth'), groan: () => tone(150, 110, .8, .2, 'sawtooth'), grunt: () => tone(140, 100, .3, .3, 'sawtooth'),
+  }[n] || sfx.thud;
+  f();
+}
+let rwOn = false;
+function rewindFx(on) { rwOn = on; $('#c').style.filter = on ? 'grayscale(.7) contrast(1.25) hue-rotate(160deg)' : ''; const r = $('#rw'); if (r) r.hidden = !on; }
+function runCat(P, H) {
+  const c = CATM[P.e], arch = c[1], q = c[4], gp = gren.G.position, { R, once, at, Pi, fly, toHand } = H;
+  const bub2 = (pos, cls = 'loud', dur = 1.4) => say(bub(P.e), () => _c.copy(typeof pos === 'function' ? pos() : pos), dur, cls);
+  const done = () => { once('fx', () => { if (q.snd) snd(q.snd); else sfx.thud(); }); };
+  if (arch === 'hit' || arch === 'catch') {
+    const A = makeA(c[3]); const base = V(RX + (A.k === 'p' ? .45 : .2), 0, Pi.z + .4); A.G.position.copy(base); A.G.rotation.y = PI;
+    const jump = A.k === 'p' ? clamp(Pi.y - (q.h ?? 1.2), 0, 1.6) : 0;
+    return (t, dt) => {
+      const w = t - (P.ti - .3), k = clamp(w / .6, 0, 1);
+      if (A.k === 'p') { resetPose(A.P); A.G.position.y = jump * (w < 0 ? 0 : Math.sin(Math.min(1, w / .7) * PI)); }
+      if (t < P.ti) { fly(t); if (A.k === 'p') swingP(A.P, q.st || 'bat', arch === 'catch' ? 0 : k); else if (A.k === 'q') swingQ(A.Q, q.st, k); return; }
+      const [i, u] = segAt(P, t);
+      if (arch === 'hit') {
+        if (A.k === 'p') swingP(A.P, q.st || 'bat', k); else if (A.k === 'q') swingQ(A.Q, q.st, k);
+        once('h', () => { done(); bub2(V(base.x, base.y + (A.top || 1.8) + .6 + jump, base.z)); });
+        toHand(Pi, u, P.seg[0]);
+      } else if (i === 0) {
+        once('h', () => { sfx.thud(); bub2(V(base.x, (A.top || 1.8) + .6, base.z), 'loud', 1.6); });
+        A.G.position.y = 0; if (A.k === 'p') { const kk = clamp((u * P.seg[0] - (P.seg[0] - .35)) / .7, 0, .5); swingP(A.P, q.st || 'throw', kk); if (kk <= 0) { A.P.R.sh.rotation.x = -1.4; A.P.L.sh.rotation.x = -1.4; } }
+        A.hold(gp); if (q.spin) { gp.y += .25 + Math.abs(Math.sin(t * 8)) * .3; gren.G.rotation.y += dt * 20; }
+        R.rel = gp.clone();
+      } else { if (A.k === 'p') swingP(A.P, q.st || 'throw', .5 + Math.min(.5, u * 4)); once('t', () => { if (q.snd) snd(q.snd); else sfx.whoosh(); }); toHand(R.rel, u, P.seg[1]); }
+    };
+  }
+  if (arch === 'pick') {
+    const A = makeA(c[3]); const stand = V(RX + (A.k === 'p' ? .55 : .9), 0, P.D + (A.k === 'q' ? (QUADS[c[3].q].L * .8 + .3) : .35)), from = V(RX + 6, 0, P.D + 1.5);
+    const G0 = at(P.ti); G0.y = .09;
+    return (t, dt) => {
+      if (t < P.ti) { fly(t); const k = clamp(1 - (P.ti - t) / 2, 0, 1); A.G.position.lerpVectors(from, stand, k); faceTo(A, stand.x, stand.z, 1); if (A.k === 'p') walk(A.P, t * 7, k < 1 ? .5 : 0); else animA(A, 'walk', t * 7, k < 1 ? .6 : 0, dt); return; }
+      const [i, u] = segAt(P, t);
+      if (i === 0) {
+        once('l', sfx.thud); faceTo(A, G0.x, G0.z, Math.min(1, dt * 6));
+        if (A.k === 'p') { resetPose(A.P); const kk = u < .5 ? u / .5 : 1 - (u - .5) / .5; crouch(A.P, ease(kk) * .8); A.P.R.sh.rotation.x = -kk * 1.2; if (u > .75) swingP(A.P, q.st || 'throw', (u - .75) * 2); }
+        else swingQ(A.Q, q.st, u < .5 ? u * 2 : 0);
+        if (u < .45) gp.copy(G0); else A.hold(gp);
+        if (u > .5) { faceTo(A, 0, 0, Math.min(1, dt * 6)); once('s', () => bub2(V(stand.x, (A.top || 1.8) + .7, stand.z), 'loud', 1.6)); }
+        R.rel = gp.clone();
+      } else { faceTo(A, 0, 0, 1); if (A.k === 'p') swingP(A.P, q.st || 'throw', .5 + Math.min(.5, u * 4)); else swingQ(A.Q, q.st, .5 + Math.min(.5, u * 4)); once('t', () => { if (q.snd) snd(q.snd); else sfx.whoosh(); }); toHand(R.rel, u, P.seg[1]); }
+    };
+  }
+  if (arch === 'bounce') {
+    const A = makeA(c[3]); const base = V(A.k === 'p' ? RX + .1 : RX, 0, Pi.z + (A.k === 'v' ? 1.4 : .45)); A.G.position.copy(base); A.G.rotation.y = A.k === 'v' ? -PI / 2 : PI;
+    const mode = q.mode || 'static';
+    return (t, dt) => {
+      const pre = t - P.ti;
+      if (mode === 'rise') A.G.position.y = lerp(-(A.top + .5), 0, easeOut(clamp((pre + .5) / .45, 0, 1)));
+      else if (mode === 'drop') { const k = clamp((pre + .6) / .6, 0, 1); A.G.position.y = 30 * (1 - k * k); A.G.visible = pre > -.65; }
+      else if (mode === 'slide') { A.G.position.x = pre < 0 ? base.x + Math.min(40, -pre * 30) : base.x - pre * 30; animA(A, 'drive', 0, 5, dt); A.G.visible = Math.abs(A.G.position.x) < 60; }
+      else if (mode === 'pop') A.G.scale.setScalar(Math.max(.01, easeOut(clamp((pre + .35) / .35, 0, 1))));
+      if (A.k === 'p') { resetPose(A.P); swingP(A.P, q.st || 'push', clamp((pre + .3) / .6, 0, 1)); }
+      if (t < P.ti) { fly(t); return; }
+      const u = segAt(P, t)[1];
+      once('h', () => { done(); bub2(V(RX, Math.max(Pi.y, A.top || 1) + .9, Pi.z)); });
+      if (A.k !== 'p' && A.k !== 'v') { const s = 1 + Math.sin(Math.min(1, pre / .25) * PI) * .1; A.G.scale.set(s, 2 - s, s); }
+      toHand(Pi, u, P.seg[0]);
+    };
+  }
+  if (arch === 'carry') {
+    const A = makeA(c[3]); const isV = A.k === 'v';
+    const roll = V(RX, .09, P.D + .5), start = isV ? V(RX + 1.2, 0, P.D + 28) : V(RX + 7, 0, P.D + 3.5);
+    const pick = V(RX + (isV ? 1.2 : .3), 0, P.D + (A.k === 'q' ? .8 + (QUADS[c[3].q] ? QUADS[c[3].q].L * .5 : 0) : 1.0)), end = V(RX + (isV ? 1.4 : .3), 0, A.k === 'q' ? 1.2 + (QUADS[c[3].q] ? QUADS[c[3].q].L * .5 : 0) : 1.5);
+    A.G.position.copy(start); faceTo(A, pick.x, pick.z, 1);
+    const mv = q.mv || (A.k === 'p' ? 'run' : 'gallop'); let ph = 0;
+    const move = (dt, sp) => {
+      ph += dt * (mv === 'walk' ? 6 : mv === 'crawl' ? 3 : 14) * Math.min(1.6, .4 + sp / 6);
+      if (A.k === 'p') walk(A.P, ph, mv === 'walk' ? .4 : .9);
+      else animA(A, mv, ph, mv === 'walk' ? .5 : 1, dt);
+      if (mv === 'hop') A.G.position.y = Math.abs(Math.sin(ph * .5)) * .5;
+      if (mv === 'waddle') A.G.rotation.z = Math.sin(ph) * .2;
+      if (mv === 'side') A.G.rotation.y = PI / 2;
+    };
+    return (t, dt) => {
+      if (t < P.ti) { fly(t); if (A.k === 'p') walk(A.P, 0, 0); return; }
+      const [i, u] = segAt(P, t); const G0 = at(P.ti); G0.y = .09;
+      if (i === 0) { gp.lerpVectors(G0, roll, easeOut(u)); once('l', sfx.thud); }
+      else if (i === 1) { A.G.position.lerpVectors(start, pick, ease(u)); faceTo(A, pick.x, pick.z, 1); if (u > .8) faceTo(A, 0, 0, clamp((u - .8) * 5, 0, 1)); move(dt, 4); if (u > .85) A.hold(gp); else gp.copy(roll); if (A.k === 'p' && u > .7) A.P.R.sh.rotation.x = -1.1; if (u > .5) once('s', () => { if (q.snd) snd(q.snd); bub2(() => _c.copy(A.G.position).setY((A.top || 1.8) + .7 + A.G.position.y), 'loud', 1.6); }); }
+      else if (i === 2) { A.G.position.lerpVectors(pick, end, u); faceTo(A, 0, -10, 1); if (mv === 'side') A.G.rotation.y = PI / 2; move(dt, q.spd); if (A.k === 'p') { A.P.R.sh.rotation.x = -1.1; A.P.R.el.rotation.x = -.4; } A.hold(gp); }
+      else { if (A.k === 'p') { walk(A.P, 0, 0); A.P.R.sh.rotation.x = -1.4; } A.G.position.y = 0; A.hold(_a); if (q.give === 'hand') gp.lerpVectors(_a, HAND, ease(u)); else { gp.lerpVectors(_a, FEET, easeOut(u)); gp.y = Math.max(.09, gp.y); } }
+    };
+  }
+  if (arch === 'air') {
+    const A = makeA(c[3]); const Hh = q.H ?? 6.5, off = A.off ?? .5;
+    const from = V(RX + 16, Pi.y + 6, Pi.z + 8), above = V(RX, Hh, 1.4);
+    let ph = 0;
+    return (t, dt) => {
+      ph += dt * 14; animA(A, 'fly', ph, 1, dt);
+      if (t < P.ti) { fly(t); const k = clamp((t - (P.ti - 1.1)) / 1.1, 0, 1); A.G.visible = k > 0; A.G.position.lerpVectors(from, _a.copy(Pi).setY(Pi.y + off), ease(k)); if (A.k === 'b') A.G.lookAt(Pi.x, Pi.y + off, Pi.z); else A.G.rotation.y = Math.atan2(Pi.x - A.G.position.x, Pi.z - A.G.position.z) * .3; return; }
+      const [i, u] = segAt(P, t);
+      if (i === 0) { once('c', () => { if (q.snd) snd(q.snd); else if (A.k === 'b') sfx.caw(); bub2(() => _c.copy(A.G.position).setY(A.G.position.y + 1.3), 'loud', 1.6); }); A.G.position.copy(Pi).setY(Pi.y + off + u * .5); gp.copy(A.G.position).setY(A.G.position.y - off); }
+      else if (i === 1) { A.G.position.lerpVectors(_a.copy(Pi).setY(Pi.y + off + .5), _b.copy(above).setY(Hh + off), ease(u)); if (A.k === 'b') A.G.lookAt(above.x, A.G.position.y, above.z - 1); else A.G.rotation.y = lerp(A.G.rotation.y, PI, Math.min(1, dt * 3)); gp.copy(A.G.position).setY(A.G.position.y - off); }
+      else { A.G.position.add(_a.set(dt * 3, dt * 4, dt * 5)); gp.set(lerp(above.x, HAND.x, u), Hh - (Hh - HAND.y) * u * u, lerp(above.z, HAND.z, u)); }
+    };
+  }
+  if (arch === 'erupt') {
+    const A = makeA(c[3]); const L0 = V(RX, .09, P.D); A.G.position.set(RX, 0, P.D + (c[3].x === 'manhole' || c[3].x === 'fountain' || !c[3].x ? 0 : .35)); A.G.rotation.y = PI;
+    const mode = q.mode || 'pop'; if (mode === 'pop') A.G.scale.setScalar(.01);
+    let col = null; if (q.fx != null) { col = new THREE.Mesh(new THREE.CylinderGeometry(.35, .6, 1, 14, 1, true), new THREE.MeshStandardMaterial({ color: q.fx, transparent: true, opacity: .75, roughness: .2, emissive: q.fx === 0xff6020 ? 0x803010 : 0 })); col.visible = false; A.G.add(col); }
+    let S = null; if (q.sumo) { S = makePerson({ w: 1.75, belt: M.dark }); S.G.position.set(RX, 8, P.D - 1.9); S.G.rotation.y = PI; }
+    return (t, dt) => {
+      if (t < P.ti) { fly(t); return; }
+      const [i, u] = segAt(P, t);
+      if (i === 0) {
+        once('l', sfx.thud); gp.copy(L0); if (c[3].x === 'jackbox' || c[3].x === 'toaster' || c[3].x === 'popcorn') gp.y = -5;
+        if (mode === 'pop') A.G.scale.setScalar(Math.max(.01, easeOut(Math.min(1, u * 2.5))));
+        A.G.position.x = RX + Math.sin(t * 50) * .04 * u; if (u > .3) once('r', sfx.rumble);
+        if (S) S.G.position.y = Math.max(.6, 8 - u * u * 8);
+      } else {
+        once('b', () => { if (q.snd) snd(q.snd); say(bub(P.e), () => _c.set(RX, 4, P.D), 1.6, 'loud'); });
+        if (col) { const h = Math.min(10, u * 50) * (u > .75 ? (1 - u) / .25 : 1); col.visible = h > .05; col.scale.set(1, h, 1); col.position.y = h / 2; }
+        if (c[3].x === 'catapult') A.G.children[1].rotation.x = lerp(-.6, .9, Math.min(1, u * 8));
+        toHand(L0, u, P.seg[1]);
+      }
+    };
+  }
+  if (arch === 'claw') {
+    const G = makeA({ x: 0 }).G; const hook = !!q.hook;
+    partsTo(G, hook ? [['c', .01, .01, 40, 0x222222, 0, 20.3, 0], ['b', .3, .4, .2, 0xf0c020, 0, .5, 0], ['t', .15, .03, PI * 1.4, 0x707070, 0, .1, 0]] : [['c', .015, .015, 40, 0x999999, 0, 20.5, 0], ['c', .25, .3, .35, 0xc0c4c8, 0, .45, 0], ...[0, 1, 2].map(i => ['b', .05, .5, .05, 0xc0c4c8, Math.cos(i * 2.1) * .2, 0, Math.sin(i * 2.1) * .2, Math.sin(i * 2.1) * .3, 0, -Math.cos(i * 2.1) * .3])]);
+    const Hd = HAND.y + .5 * GR * P.seg[2] * P.seg[2], above = V(HAND.x, Hd, HAND.z);
+    return (t, dt) => {
+      if (t < P.ti) { fly(t); const k = clamp((t - (P.ti - 1.2)) / 1.2, 0, 1); G.position.set(Pi.x, Pi.y + .15 + (1 - k) * 25, Pi.z); return; }
+      const [i, u] = segAt(P, t);
+      if (i === 0) { once('g', () => { sfx.click(); bub2(() => _c.copy(G.position).setY(G.position.y + 1.2), 'loud', 1.6); }); G.position.set(Pi.x, Pi.y + .15 + u * .3, Pi.z); gp.copy(G.position).setY(G.position.y - .15); }
+      else if (i === 1) { G.position.lerpVectors(_a.copy(Pi).setY(Pi.y + .45), _b.copy(above).setY(Hd + .15), ease(u)); gp.copy(G.position).setY(G.position.y - .15); }
+      else { G.position.y = Hd + .15 + u * 2; gp.set(above.x, Hd - (Hd - HAND.y) * u * u, above.z); }
+    };
+  }
+  if (arch === 'rewind') {
+    return (t, dt) => {
+      if (t < P.ti) { fly(t); return; }
+      const [i, u] = segAt(P, t);
+      if (i === 0) { const G0 = at(P.ti); G0.y = .09; gp.copy(G0); if (u > .2) once('r', () => { rewindFx(true); tone(800, 200, .6, .15, 'sawtooth'); }); }
+      else { ball(P, P.tl * (1 - u), gp); gren.G.rotation.x -= dt * 20; if (u > .98) rewindFx(false); }
+    };
+  }
+  if (arch === 'portal') {
+    const A = makeA({ x: 0 }), B = makeA({ x: 0 });
+    const ring = (G, col) => { const r = new THREE.Mesh(new THREE.TorusGeometry(1, .12, 12, 40), new THREE.MeshBasicMaterial({ color: col })); const d = new THREE.Mesh(new THREE.CircleGeometry(.95, 32), new THREE.MeshBasicMaterial({ color: 0x101830, side: THREE.DoubleSide })); G.add(r, d); };
+    ring(A.G, 0x40a0ff); ring(B.G, 0xff9030); A.G.position.copy(Pi); A.G.scale.setScalar(.01); B.G.position.set(RX, 3.4, -2.6); B.G.scale.setScalar(.01);
+    const back = V(RX + .25, 1.55, -.18);
+    return (t, dt) => {
+      A.G.rotation.z += dt * 3; B.G.rotation.z -= dt * 3;
+      if (t < P.ti) { fly(t); A.G.scale.setScalar(Math.max(.01, clamp((t - (P.ti - .4)) / .4, 0, 1))); return; }
+      const [i, u] = segAt(P, t);
+      if (i === 0) { once('p', () => { tone(200, 900, .5, .2, 'sine'); bub2(V(Pi.x, Pi.y + 1.6, Pi.z)); }); gp.copy(Pi); gren.G.scale.setScalar(1.05 * (1 - u)); B.G.scale.setScalar(Math.max(.01, u)); }
+      else { gren.G.scale.setScalar(1.05); A.G.scale.setScalar(Math.max(.01, 1 - u * 2)); arc(gp, B.G.position, back, u, .6); once('o', () => tone(900, 200, .5, .2, 'sine')); }
+    };
+  }
+  if (arch === 'slide') {
+    const A = makeA({ x: 0 });
+    if (q.fx === 'ice' || q.fx === 'belt') { const m = new THREE.Mesh(new THREE.PlaneGeometry(3, P.D + 3), new THREE.MeshStandardMaterial({ color: q.fx === 'ice' ? 0xcfeeff : 0x2a2a2e, roughness: q.fx === 'ice' ? .05 : .8, transparent: q.fx === 'ice', opacity: .85 })); m.rotation.x = -PI / 2; m.position.set(RX, .07, (P.D + 3) / 2 - .5); A.G.add(m); }
+    let stripes = null;
+    if (q.fx === 'belt') { stripes = []; for (let z = 0; z < P.D + 2; z += 1.2) { const s = new THREE.Mesh(new THREE.PlaneGeometry(2.8, .12), new THREE.MeshBasicMaterial({ color: 0xf0c020 })); s.rotation.x = -PI / 2; s.position.set(RX, .08, z); A.G.add(s); stripes.push(s); } }
+    return (t, dt) => {
+      if (stripes) stripes.forEach(s => { s.position.z -= dt * q.spd; if (s.position.z < -.5) s.position.z += P.D + 2; });
+      if (t < P.ti) { fly(t); return; }
+      const [i, u] = segAt(P, t); const G0 = at(P.ti); G0.y = .09;
+      if (i === 0) { once('l', sfx.thud); gp.copy(G0); gp.z += u * .5; }
+      else { once('s', () => { if (q.fx === 'belt') snd('engine'); else tone(400, 300, .8, .12); bub2(V(RX, 1.5, G0.z)); }); gp.lerpVectors(_a.copy(G0).setZ(G0.z + .5), FEET, q.fx === 'ice' ? u : u * u); gren.G.rotation.x -= dt * 10; }
+    };
+  }
+  return t => fly(t);
+}
+
 function makeRun(P) {
   const R = { P, onces: {}, maxZ: 0 };
   const once = (k, f) => { if (!R.onces[k]) { R.onces[k] = 1; f(); } };
@@ -888,6 +1554,133 @@ function makeRun(P) {
         gren.G.rotation.y += dt * 30;
       }; break;
     }
+    case 'ambush': {
+      const B = addActor(makePerson({ cap: M.red })); B.G.scale.setScalar(.9);
+      const bat = prop('bat'); B.R.hand.add(bat);
+      const from = V(RX + 5, 0, Pi.z + 2), stand = V(RX + .5, 0, Pi.z + .3), jumpH = Math.max(0, Pi.y - 1.25);
+      upd = (t, dt) => {
+        B.R.sh.rotation.x = -1.35; B.R.sh.rotation.z = -.2; B.R.el.rotation.x = -.2; bat.rotation.x = -1.5; B.L.sh.rotation.x = -1.3; B.L.sh.rotation.z = -.6;
+        if (t < P.ti) {
+          const k = clamp(t / P.ti, 0, 1); B.G.position.lerpVectors(from, stand, easeOut(k)); B.G.position.y = jumpH * Math.sin(k * Math.PI / 2) + Math.sin(k * Math.PI) * .6;
+          B.G.rotation.y = Math.PI; B.torso.rotation.y = lerp(1.2, .6, k); walk(B, t * 30, .6 * (1 - k));
+          B.R.sh.rotation.x = -1.35; B.R.sh.rotation.z = -.2; B.R.el.rotation.x = -.2; B.L.sh.rotation.x = -1.3; B.L.sh.rotation.z = -.6;
+          once('a', () => say(bub('ambush'), () => _c.copy(B.G.position).setY(B.G.position.y + 2.2), 1.2, 'loud'));
+          fly(t);
+        } else {
+          const u = segAt(P, t)[1]; B.torso.rotation.y = lerp(.6, -1.1, Math.min(1, u * 6)); B.G.position.y = Math.max(0, jumpH * (1 - u * 3));
+          once('h', () => { sfx.bat(); flash(.25); }); toHand(Pi, u, P.seg[0]);
+        }
+      }; break;
+    }
+    case 'kite': {
+      const C = addActor(makeCrow(M.wood, 2.6)); const ap = at(P.ti); const from = V(RX + 16, ap.y + 6, ap.z + 8), above = V(RX, 6.5, 1.4);
+      upd = (t, dt) => {
+        C.wings.forEach((w, i) => w.rotation.z = Math.sin(t * 11) * .55 * (i ? -1 : 1));
+        if (t < P.ti) { fly(t); const k = clamp((t - (P.ti - 1.1)) / 1.1, 0, 1); C.G.visible = k > 0; C.G.position.lerpVectors(from, _a.copy(ap).add(V(0, .7, 0)), ease(k)); C.G.lookAt(ap.x, ap.y + .7, ap.z); return; }
+        const [i, u] = segAt(P, t);
+        if (i === 0) { once('c', () => { tone(1800, 1200, .5, .15, 'sine'); tone(1300, 900, .6, .12, 'sine', .45); say(bub('kite'), () => _c.copy(C.G.position).setY(C.G.position.y + 1.2), 1.4); }); C.G.position.copy(ap).add(V(0, .7 + u * .5, 0)); C.claw.getWorldPosition(gp); }
+        else if (i === 1) { C.G.position.lerpVectors(_a.copy(ap).add(V(0, 1.2, 0)), _b.copy(above).add(V(0, .7, 0)), ease(u)); C.G.lookAt(above.x, C.G.position.y, above.z - 1); C.claw.getWorldPosition(gp); }
+        else { C.G.position.add(V(dt * 3, dt * 4, dt * 5)); gp.set(lerp(above.x, HAND.x, u), 6.5 - (6.5 - HAND.y) * u * u, lerp(above.z, HAND.z, u)); }
+      }; break;
+    }
+    case 'cat': {
+      const Ct = addActor(makeCat()); Ct.G.position.set(RX + .25, 0, Pi.z + .45); Ct.G.rotation.y = Math.PI;
+      upd = t => {
+        Ct.tail.rotation.z = Math.sin(t * 5) * .5;
+        const w = (t - (P.ti - .25)) / .25; Ct.paw.rotation.x = w < 0 ? 0 : w < 1 ? -2.2 * w : lerp(-2.2, .6, Math.min(1, (w - 1) * 4));
+        if (t < P.ti) fly(t); else { once('h', () => { tone(900, 1400, .15, .2, 'triangle'); sfx.pock(); say(bub('cat'), () => _c.copy(Ct.G.position).setY(1.1), 1.2, 'loud'); }); toHand(Pi, segAt(P, t)[1], P.seg[0]); }
+      }; break;
+    }
+    case 'soccer': case 'volley': {
+      const isV = e === 'volley';
+      const Pl = addActor(makePerson({ cap: isV ? null : M.green, mat: isV ? M.white : M.body })); Pl.G.position.set(RX + (isV ? .35 : .05), 0, Pi.z + (isV ? .45 : .3)); Pl.G.rotation.y = Math.PI;
+      const jump = isV ? clamp(Pi.y - 2.35, .1, 1.4) : clamp(Pi.y - 1.75, 0, 1.2);
+      upd = t => {
+        const w = (t - (P.ti - .45)) / .45, k = w < 0 ? 0 : w < 1 ? Math.sin(w * Math.PI / 2) : Math.max(0, 1 - (w - 1) * 2);
+        Pl.G.position.y = jump * k; crouch(Pl, w < 0 ? .25 : 0);
+        if (isV) { Pl.R.sh.rotation.x = w < .7 ? lerp(-.2, 2.9, clamp(w / .7, 0, 1)) : lerp(2.9, -1.4, clamp((w - .7) / .3, 0, 1)); Pl.L.sh.rotation.x = -2.6 * clamp(w, 0, 1); Pl.R.el.rotation.x = -.3; }
+        else { Pl.torso.rotation.x = w < .8 ? -.4 * clamp(w, 0, 1) : .5; Pl.R.sh.rotation.z = -.8; Pl.L.sh.rotation.z = .8; }
+        if (t < P.ti) fly(t); else { once('h', () => { isV ? (sfx.thud(), sfx.pock()) : sfx.pock(); say(bub(e), () => _c.copy(Pl.G.position).setY(Pl.G.position.y + 2.3), 1.3, 'loud'); }); toHand(Pi, segAt(P, t)[1], P.seg[0]); }
+      }; break;
+    }
+    case 'clone': {
+      const Cl = addActor(makePerson()); Cl.G.position.set(-RX, 0, P.D + .9); Cl.G.rotation.y = Math.PI;
+      const pickAt = V(RX, .09, P.D);
+      upd = (t, dt) => {
+        if (t < P.ti) { fly(t); Cl.R.sh.rotation.x = -.2; Cl.head.rotation.x = -.2; return; }
+        const [i, u] = segAt(P, t);
+        if (i === 0) { once('l', () => { sfx.thud(); }); crouch(Cl, Math.sin(u * Math.PI) * .7); Cl.R.sh.rotation.x = -1.1; if (u < .5) gp.copy(pickAt); else handPos(Cl.R, gp); if (u > .6) once('s', () => say(bub('clone'), () => _c.copy(Cl.G.position).setY(2.2), 1.6)); }
+        else {
+          crouch(Cl, 0);
+          const k = clamp(u * P.seg[1] / .35, 0, 1);
+          Cl.R.sh.rotation.x = k < .6 ? lerp(-.5, 2.5, k / .6) : lerp(2.5, -1.4, (k - .6) / .4); Cl.torso.rotation.y = k < .6 ? .5 * k / .6 : lerp(.5, -.4, (k - .6) / .4);
+          if (k < 1) { handPos(Cl.R, gp); R.rel = gp.clone(); R.rel.u = u; }
+          else { const u2 = (u - R.rel.u) / (1 - R.rel.u); once('t', sfx.whoosh); toHand(R.rel, u2, P.seg[1] * (1 - R.rel.u)); }
+        }
+      }; break;
+    }
+    case 'geyser': {
+      const Gy = addActor({ G: new THREE.Group() }); scene.add(Gy.G); Gy.G.position.set(RX, 0, P.D);
+      const crack = new THREE.Mesh(new THREE.CircleGeometry(.9, 20), new THREE.MeshBasicMaterial({ color: 0x3a2a1a })); crack.rotation.x = -Math.PI / 2; crack.position.y = .07; crack.scale.setScalar(.01); Gy.G.add(crack);
+      const wm = new THREE.MeshStandardMaterial({ color: 0xbfe6ff, transparent: true, opacity: .7, roughness: .1 });
+      const col = new THREE.Mesh(new THREE.CylinderGeometry(.45, .7, 1, 16, 1, true), wm); col.visible = false; Gy.G.add(col);
+      const steam = new THREE.Mesh(new THREE.SphereGeometry(1, 12, 8), new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: .5, depthWrite: false })); steam.visible = false; Gy.G.add(steam);
+      upd = (t, dt) => {
+        if (t < P.ti) { fly(t); return; }
+        const [i, u] = segAt(P, t); const A = at(P.ti); A.y = .1;
+        if (i === 0) { once('l', sfx.thud); gp.copy(A); crack.scale.setScalar(u); gp.x += Math.sin(t * 60) * .03 * u; if (u > .3) once('r', sfx.rumble); }
+        else {
+          once('b', () => { noise(2.2, 1400, .45); say(bub('geyser'), () => _c.set(RX, 4, P.D), 1.6, 'loud'); });
+          const h = Math.min(9, u * 40) * (u > .7 ? (1 - u) / .3 : 1); col.visible = h > .05; col.scale.set(1, h, 1); col.position.y = h / 2; steam.visible = true; steam.position.y = h; steam.scale.setScalar(1 + u * 2); steam.material.opacity = .5 * (1 - u);
+          toHand(A, u, P.seg[1]);
+        }
+      }; break;
+    }
+    case 'mole': {
+      const Mo = addActor(makeMole()); Mo.G.position.set(RX, 0, P.D + .35); Mo.G.rotation.y = Math.PI; Mo.head.position.y = -.25;
+      upd = (t, dt) => {
+        if (t < P.ti) { fly(t); Mo.G.visible = false; return; }
+        Mo.G.visible = true;
+        const [i, u] = segAt(P, t); const A = at(P.ti); A.y = .1;
+        if (i === 0) { once('l', sfx.thud); gp.copy(A); Mo.head.position.y = lerp(-.25, .22, easeOut(u)); Mo.G.scale.setScalar(.4 + .6 * easeOut(u)); if (u > .6) { Mo.head.getWorldPosition(gp); gp.z -= .25; gp.y += .05; } }
+        else { once('s', () => { tone(500, 200, .15, .3, 'square'); say(bub('mole'), () => _c.copy(Mo.G.position).setY(1), 1.2, 'loud'); }); Mo.head.rotation.x = -Math.sin(Math.min(1, u * 5) * Math.PI) * .5; R.rel = R.rel || gp.clone(); toHand(R.rel, u, P.seg[1]); }
+      }; break;
+    }
+    case 'scooter': {
+      const Sc = addActor(makeScooter()); const Rd = addActor(makePerson({ cap: M.red }));
+      const roll = V(RX, .09, P.D + .5), start = V(RX + 18, 0, P.D + 1.2), pick = V(RX + .6, 0, P.D + .9), end = V(RX + .8, 0, 1.6);
+      const place = (pos, ry) => { Sc.G.position.copy(pos); Sc.G.rotation.y = ry; Rd.G.position.set(pos.x, .32, pos.z); Rd.G.rotation.y = ry; crouch(Rd, .55); Rd.torso.rotation.x = .2; Rd.R.sh.rotation.x = Rd.L.sh.rotation.x = -1.2; };
+      place(start, -Math.PI / 2);
+      upd = (t, dt) => {
+        if (t < P.ti) { fly(t); return; }
+        const [i, u] = segAt(P, t); const A = at(P.ti); A.y = .09;
+        Sc.wheels.forEach(w => w.rotation.x += dt * 20);
+        if (i === 0) { gp.lerpVectors(A, roll, easeOut(u)); once('l', sfx.thud); }
+        else if (i === 1) { place(_a.lerpVectors(start, pick, easeOut(Math.min(1, u * 1.4))), lerp(-Math.PI / 2, Math.PI, clamp((u - .5) * 2, 0, 1))); if (u > .75) { Rd.R.sh.rotation.x = -.6; handPos(Rd.R, gp); } else gp.copy(roll); if (u > .2) once('b', () => tone(700, 900, .2, .12, 'square')); }
+        else if (i === 2) { place(_a.lerpVectors(pick, end, u), Math.PI); Rd.R.sh.rotation.x = -.9; handPos(Rd.R, gp); if (Math.sin(t * 40) > .99) sfx.step(); }
+        else { place(end, Math.PI); once('s', () => say(bub('scooter'), () => _c.copy(Rd.G.position).setY(2.3), 1.6)); Rd.R.sh.rotation.x = -1.5; Rd.R.el.rotation.x = 0; handPos(Rd.R, _a); gp.lerpVectors(_a, HAND, ease(u)); }
+      }; break;
+    }
+    case 'magnet': {
+      const Mg = addActor({ G: new THREE.Group(), noBlow: true }); me.torso.add(Mg.G); Mg.G.position.set(0, .32, .16);
+      const u0 = mesh(new THREE.TorusGeometry(.08, .028, 8, 16, Math.PI), M.red); u0.rotation.z = Math.PI; Mg.G.add(u0);
+      for (const sd of [-1, 1]) Mg.G.add(mesh(new THREE.BoxGeometry(.056, .05, .056), M.metal, sd * .08, .02, 0));
+      upd = (t, dt) => {
+        if (t < P.ti) { fly(t); return; }
+        const [i, u] = segAt(P, t);
+        if (i === 0) { once('m', () => { sfx.click(); tone(120, 120, .6, .2, 'sawtooth'); say(bub('magnet'), () => _c.copy(Pi).setY(Pi.y + .7), 1.2, 'loud'); }); gp.copy(Pi); gp.x += Math.sin(t * 50) * .04; gp.y += Math.sin(t * 43) * .04; gren.G.rotation.y += dt * 3; }
+        else { gp.lerpVectors(Pi, HAND, u * u); gren.G.rotation.x = 0; once('z', () => noise(.6, 2500, .2, 'bandpass', 2)); }
+      }; break;
+    }
+    case 'bungee': {
+      const Bg = addActor({ G: new THREE.Mesh(new THREE.CylinderGeometry(.012, .012, 1, 6), new THREE.MeshStandardMaterial({ color: 0xff6aa8, roughness: .5 })), noBlow: true }); scene.add(Bg.G);
+      const up = V(0, 1, 0);
+      upd = (t, dt) => {
+        if (t < P.ti) fly(t); else { const u = segAt(P, t)[1]; once('b', () => { sfx.boing(); say(bub('bungee'), () => _c.copy(Pi).setY(Pi.y + .8), 1.2, 'loud'); }); gp.lerpVectors(Pi, HAND, u * u * (3 - 2 * u)); gp.y += Math.sin(u * Math.PI) * 1.2; }
+        const hp = handPos(me.R, _a), d = _b.subVectors(gp, hp), L = d.length();
+        Bg.G.position.copy(hp).addScaledVector(d, .5); Bg.G.scale.set(1, Math.max(.01, L), 1); Bg.G.quaternion.setFromUnitVectors(up, d.normalize());
+      }; break;
+    }
     case 'orbit': {
       const back = V(RX + .25, 1.55, -.18), from = V(RX - .8, 7, -60);
       upd = (t, dt) => {
@@ -898,9 +1691,10 @@ function makeRun(P) {
       }; break;
     }
   }
+  if (!upd) upd = runCat(P, { R, once, at, Pi, fly, toHand });
   R.update = (t, dt) => {
     upd(t, dt);
-    if (e !== 'ufo' && e !== 'orbit' && e !== 'boomerang' && e !== 'crow') gren.G.rotation.x += dt * (t < P.ti ? 12 : 9);
+    if (e !== 'ufo' && e !== 'orbit' && e !== 'boomerang' && e !== 'crow' && e !== 'kite' && e !== 'magnet') gren.G.rotation.x += dt * (t < P.ti ? 12 : 9);
     R.maxZ = Math.max(R.maxZ, gp.z);
   };
   return R;
@@ -915,7 +1709,7 @@ function resetWorld() {
   clearActors(); clearFx(); clearBubs(); resetMe(); fuseOn(false);
   gren.G.visible = true; gren.G.rotation.set(0, 0, 0); gren.ring.visible = true; gren.lever.visible = true; gren.legs.forEach(l => l.visible = false); setLit(false);
   run = null; plan = null; tRun = 0; showMark = false; $('#globe').hidden = true;
-  for (const k in onc2) delete onc2[k]; clearSaid = false;
+  for (const k in onc2) delete onc2[k]; clearSaid = false; gren.G.scale.setScalar(1.05); rewindFx(false);
   if (pinObj) { scene.remove(pinObj.o); pinObj = null; }
 }
 function startAim() {
@@ -931,7 +1725,7 @@ function updAngle() { $('#angV').textContent = Math.round(angle) + '°'; }
 function doThrow(isReplay) {
   const a10 = Math.round(angle * 10), p1000 = Math.round(power * 1000);
   const seed = isReplay ? isReplay.seed : (Math.random() * 4294967296) >>> 0;
-  plan = makePlan(isReplay ? isReplay.a : a10, isReplay ? isReplay.p : p1000, seed);
+  plan = makePlan(isReplay ? isReplay.a : a10, isReplay ? isReplay.p : p1000, seed, isReplay && isReplay.v ? isReplay.v : VER);
   plan.a10 = isReplay ? isReplay.a : a10; plan.p1000 = isReplay ? isReplay.p : p1000;
   if (!isReplay) lsSet('tk_ang', Math.round(angle));
   $('#ctrl').hidden = true; setHint(''); $('#hud').hidden = false;
@@ -960,7 +1754,7 @@ function toResult() {
   $('#result').hidden = false;
 }
 function boom(at, kind, e) {
-  phase = 'boom'; boomT = 0; explode(at.clone()); showMark = false; $('#globe').hidden = true;
+  phase = 'boom'; boomT = 0; rewindFx(false); explode(at.clone()); showMark = false; $('#globe').hidden = true;
   last = { kind: 'boom', s: kind === 'zero' ? 0 : plan.s, e, plan };
 }
 function startClear() {
@@ -1027,6 +1821,7 @@ function drawGlobe(u) {
 }
 
 /* ===================== カメラ ===================== */
+let nearCam = false;
 const camPos = V(-1.5, 2.6, -4.4), camLook = V(0, 1.6, 6), camPosG = V(), camLookG = V();
 function resize() {
   const w = innerWidth, h = innerHeight; renderer.setSize(w, h, false); camera.aspect = w / h;
@@ -1045,11 +1840,11 @@ function camFor(dt) {
       const dpl = gp.distanceTo(_a.set(0, 1.1, 0));
       const retT = e === 'boomerang' ? plan.total * .5 : e === 'head' ? plan.ta : plan.ti + Math.min(1.4, plan.seg[0] * .6);
       const ret = tRun > retT;
-      if (ret && (dpl < 15 || plan.total - tRun < 1.3)) {
-        const mid = _b.set(gp.x * .5, (1.1 + gp.y) * .5, gp.z * .5), sep = Math.hypot(gp.y - 1.1, gp.z);
-        const hf = Math.atan(Math.tan(camera.fov * DEG / 2) * camera.aspect);
-        const d = Math.max(5.5, (sep * .5 + 1.2) / Math.tan(hf));
-        camPosG.set(mid.x - d, mid.y + d * .18 + .6, mid.z - d * .12); camLookG.copy(mid);
+      if (tRun > (e === 'boomerang' ? plan.total * .5 : plan.ti + .45) && (dpl < 15 || plan.total - tRun < 1.3)) { nearCam = true;
+        const mid = _b.set(gp.x * .5, (1.1 + gp.y) * .5, gp.z * .5), sep = Math.hypot(gp.y - 1.1, gp.z, gp.x);
+        if (sep < 5) camPosG.set(mid.x - 7, mid.y + 1.6, mid.z - 2.5);
+        else camPosG.set(-.7, 2.6 + Math.max(0, gp.y) * .3, -5.4 - Math.min(gp.z, 40) * .06);
+        camLookG.copy(mid); if (sep >= 5) camLookG.x = gp.x * .3;
       }
       else if (!ret && tRun < plan.ti - .6) { camPosG.set(gp.x - 2.4, gp.y + 2.2, gp.z - 8); camLookG.set(gp.x, gp.y + .2, gp.z + 6); }
       else if (!ret) { camPosG.set(gp.x - 5.5, Math.max(gp.y, .5) + 2.6, gp.z - 7.5); camLookG.set(gp.x, Math.max(gp.y, .5) + .4, gp.z + 1); }
@@ -1060,7 +1855,7 @@ function camFor(dt) {
   else if (phase === 'boom') { const p = me.G.position; camPosG.set(p.x - 10, Math.max(4, p.y + 3), p.z - 7); camLookG.set(p.x, Math.max(1, p.y), p.z + 1); }
   else if (phase === 'clear') { const g = gren.G.position; camPosG.set(g.x * .5 - .5, 1.6, -4.2 + Math.min(1.2, clearT * .2)); camLookG.set(g.x * .55, .7, 1); }
   else if (phase === 'result') { /* そのまま */ }
-  const k = Math.min(1, dt * (phase === 'fly' ? 3.2 : 2.6));
+  const k = Math.min(1, dt * (phase === 'fly' ? (nearCam ? 5 : 3.2) : 2.6)); nearCam = false;
   camPos.lerp(camPosG, k); camLook.lerp(camLookG, k);
   camera.position.copy(camPos);
   if (shake > 0) { camera.position.add(V((Math.random() - .5) * shake, (Math.random() - .5) * shake, (Math.random() - .5) * shake)); shake = Math.max(0, shake - dt * 1.6); }
@@ -1147,12 +1942,13 @@ let clearSaid = false; const onc2 = {}; function once2(k, f) { if (!onc2[k]) { o
 
 /* ===================== ループ ===================== */
 let lastT = performance.now(), beepNext = 0;
+let manual = false;
 function frame(now) {
   const dt = Math.min(.05, (now - lastT) / 1000); lastT = now;
-  logic(dt); camFor(dt); updateFx(dt); updateBubs(dt);
-  renderer.render(scene, camera);
+  if (!manual) { logic(dt); camFor(dt); updateFx(dt); updateBubs(dt); renderer.render(scene, camera); }
   requestAnimationFrame(frame);
 }
+function stepAll(dt, draw) { logic(dt); camFor(dt); updateFx(dt); updateBubs(dt); if (draw) renderer.render(scene, camera); }
 function logic(dt) {
   if (pinObj) { pinObj.t += dt; pinObj.o.position.addScaledVector(pinObj.v, dt); pinObj.v.y -= GR * dt; pinObj.o.rotation.x += dt * 12; if (pinObj.o.position.y < .02) { pinObj.o.position.y = .02; pinObj.v.set(0, 0, 0); } }
   if (gren.lit) { gren.spark.scale.setScalar(.6 + Math.random() * .9); gren.light.intensity = 1 + Math.random() * 1.5; }
@@ -1210,7 +2006,7 @@ async function fbAuth() {
 async function fbGet(path, q) { const r = await fetch(FB.databaseURL + '/' + path + '.json' + (q || '')); if (!r.ok) throw new Error('get ' + r.status); return r.json(); }
 async function fbPut(path, val, a) { const r = await fetch(FB.databaseURL + '/' + path + '.json?auth=' + encodeURIComponent(a.token), { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(val) }); if (!r.ok) throw new Error('put ' + r.status); return r.json(); }
 function esc(t) { return String(t).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
-function valid(r) { if (!r || typeof r.s !== 'number' || r.v !== VER) return false; const P = makePlan(r.a, r.p, r.seed); return Math.abs(P.s - r.s) <= 2; }
+function valid(r) { if (!r || typeof r.s !== 'number' || !(r.v === 1 || r.v === 2)) return false; const P = makePlan(r.a, r.p, r.seed, r.v); return Math.abs(P.s - r.s) <= 2; }
 async function registerNage() {
   if (replayEntry) return;
   try {
@@ -1244,7 +2040,7 @@ async function showRank(kind, from) {
   const myId = (lsGet('tk_auth') || {}).uid;
   let h = `<li class="top"><span class="no">1</span><span class="nm">${esc(tr('rNoThrow'))}</span><span class="sc">${esc(tr('people', { n: r.nage.toLocaleString() }))}</span><span></span></li>`;
   if (!r.list.length) h += `<li class="rempty">${esc(kind === 'day' ? tr('rEmptyDay') : tr('rEmptyAll'))}</li>`;
-  h += r.list.map((e, i) => `<li class="${e.u === myId ? 'me' : ''}"><span class="no">${i + 2}</span><span class="nm">${esc(e.n)}<small>${esc(cause(makePlan(e.a, e.p, e.seed).e))}</small></span><span class="sc">${(e.s / 1000).toFixed(2)}</span><button class="pl" data-i="${i}" aria-label="${esc(tr('play', { n: e.n }))}">▶</button></li>`).join('');
+  h += r.list.map((e, i) => `<li class="${e.u === myId ? 'me' : ''}"><span class="no">${i + 2}</span><span class="nm">${esc(e.n)}<small>${esc(cause(makePlan(e.a, e.p, e.seed, e.v).e))}</small></span><span class="sc">${(e.s / 1000).toFixed(2)}</span><button class="pl" data-i="${i}" aria-label="${esc(tr('play', { n: e.n }))}">▶</button></li>`).join('');
   ol.innerHTML = h;
   ol.querySelectorAll('.pl').forEach(b => b.onclick = () => startReplay(r.list[+b.dataset.i]));
 }
@@ -1285,7 +2081,7 @@ $('#loading').remove();
 applyLang();
 requestAnimationFrame(frame);
 // テスト用
-window.__tk = { makePlan, get phase() { return phase; }, setAngle(a) { angle = a; }, setPower(p) { power = p; }, force(a10, p1000, seed) { startAim(); angle = a10 / 10; doThrowForced(a10, p1000, seed); }, get t() { return tRun; }, get plan() { return plan; } };
+window.__tk = { makePlan, get phase() { return phase; }, setAngle(a) { angle = a; }, setPower(p) { power = p; }, force(a10, p1000, seed) { startAim(); angle = a10 / 10; doThrowForced(a10, p1000, seed); }, get t() { return tRun; }, get plan() { return plan; }, manual(on) { manual = on; }, step(dt) { stepAll(dt, true); }, ff(sec) { const n = Math.ceil(sec * 30); for (let i = 0; i < n; i++) stepAll(sec / n, false); }, throwNow(a, p, seed) { replayEntry = null; doThrow({ a, p, seed }); }, press() { tb.dispatchEvent(new PointerEvent('pointerdown', { pointerId: 7, clientX: 0, clientY: 0 })); }, aim() { startAim(); }, title() { resetWorld(); phase = 'title'; }, catIds() { return CAT.map(c => c[0]); }, dbg() { const g = gren.G.position, c = camera.position; return [tRun.toFixed(2), g.x.toFixed(2), g.y.toFixed(2), g.z.toFixed(2), '|', c.x.toFixed(1), c.y.toFixed(1), c.z.toFixed(1)].join(' '); } };
 function doThrowForced(a10, p1000, seed) { replayEntry = null; doThrow({ a: a10, p: p1000, seed }); }
 </script>
 </body>
