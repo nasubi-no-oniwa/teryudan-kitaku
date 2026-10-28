@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="theme-color" content="#16180f">
 <meta name="description" content="手りゅう弾を渡された。絶対に自爆してはいけない。でも、どう投げても帰ってくる。">
 <meta property="og:title" content="手りゅう弾は帰宅する">
@@ -29,6 +29,13 @@
 }
 html,body{height:100%;margin:0;background:#bcd3e0;color:var(--ink);overflow:hidden;font-family:var(--body);-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent}
 [hidden]{display:none!important}
+*,*::before,*::after{box-sizing:border-box}
+html,body,button,input,#app{touch-action:manipulation}
+.overlay{grid-template-columns:minmax(0,1fr);place-items:safe center}
+.big{font-size:clamp(16px,5.4vw,21px)!important;white-space:nowrap}
+@media (max-width:360px){.sign{padding:24px 16px 18px}.how{font-size:13px}.sign h1{font-size:clamp(30px,10vw,40px)}}
+.overlay>.sign{max-width:100%;justify-self:center}
+.entry input{width:0}
 #app{position:fixed;inset:0}
 #c{width:100%;height:100%;display:block;touch-action:none}
 #labels{position:absolute;inset:0;pointer-events:none;overflow:hidden}
@@ -182,6 +189,9 @@ button:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
 
 const $ = s => document.querySelector(s);
+var tapLock = 0;
+const guard = f => (...a) => { const n = performance.now(); if (n < tapLock) return; tapLock = n + 450; f(...a); };
+
 /* ===================== ことば ===================== */
 const TX = {
   ja: {
@@ -1751,7 +1761,7 @@ function toResult() {
     const best = lsGet('tk_best') || 0;
     if (r.s > best && r.s > 0) { lsSet('tk_best', r.s); $('#resNote').textContent = tr('newBest'); } else $('#resNote').textContent = best ? tr('best', { s: (best / 1000).toFixed(2) }) : '';
   }
-  $('#result').hidden = false;
+  $('#result').hidden = false; tapLock = performance.now() + 700;
 }
 function boom(at, kind, e) {
   phase = 'boom'; boomT = 0; rewindFx(false); explode(at.clone()); showMark = false; $('#globe').hidden = true;
@@ -1774,7 +1784,7 @@ function startReplay(entry) {
 const tb = $('#throwBtn');
 let pdn = null;
 tb.addEventListener('pointerdown', e => {
-  if (phase !== 'aim') return;
+  if (phase !== 'aim' || pdn) return;
   e.preventDefault(); audioOn(); try { tb.setPointerCapture(e.pointerId); } catch (_) { }
   pdn = { id: e.pointerId, x: e.clientX, y: e.clientY, a0: angle, s0: slid, axis: null };
   holding = true; tb.classList.add('hold');
@@ -1800,9 +1810,11 @@ tb.addEventListener('pointerup', release);
 tb.addEventListener('pointercancel', release);
 tb.addEventListener('keydown', e => { if ((e.key === ' ' || e.key === 'Enter') && phase === 'aim' && !e.repeat) { e.preventDefault(); tb.dispatchEvent(new PointerEvent('pointerdown', { pointerId: 99, clientX: 0, clientY: 0 })); } });
 tb.addEventListener('keyup', e => { if ((e.key === ' ' || e.key === 'Enter') && pdn && pdn.id === 99) { e.preventDefault(); release({ pointerId: 99 }); } });
-$('#noThrow').onclick = () => { if (phase === 'aim' && Math.abs(slid) > 70) startClear(); };
-$('#start').onclick = () => { audioOn(); startAim(); };
-$('#again').onclick = () => { audioOn(); startAim(); };
+$('#noThrow').onclick = guard(() => { if (phase === 'aim' && Math.abs(slid) > 70) startClear(); });
+document.addEventListener('dblclick', e => e.preventDefault(), { passive: false });
+let lastTouch = 0; document.addEventListener('touchend', e => { const n = Date.now(); if (n - lastTouch < 350 && !(e.target.closest && e.target.closest('input'))) e.preventDefault(); lastTouch = n; }, { passive: false });
+$('#start').onclick = guard(() => { audioOn(); startAim(); });
+$('#again').onclick = guard(() => { audioOn(); startAim(); });
 $('#rpBack').onclick = () => { replayEntry = null; resetWorld(); phase = 'title'; $('#rpBar').hidden = true; $('#hud').hidden = true; setHint(''); showRank(rankKind, null); };
 let pinObj = null;
 function pinFly() { const r = mesh(new THREE.TorusGeometry(.05, .009, 8, 20), M.metal); r.position.copy(gren.G.position); scene.add(r); pinObj = { o: r, v: V(-.8, 2.5, -.5), t: 0 }; }
@@ -2046,9 +2058,9 @@ async function showRank(kind, from) {
 }
 $('#tabDay').onclick = () => showRank('day');
 $('#tabAll').onclick = () => showRank('all');
-$('#titleRank').onclick = () => { audioOn(); showRank('day', 'title'); };
-$('#resRank').onclick = () => showRank(rankKind, 'result');
-$('#rankClose').onclick = () => {
+$('#titleRank').onclick = guard(() => { audioOn(); showRank('day', 'title'); });
+$('#resRank').onclick = guard(() => showRank(rankKind, 'result'));
+$('#rankClose').onclick = () => { if (performance.now() < tapLock) return; tapLock = performance.now() + 450;
   $('#rank').hidden = true;
   if (rankFrom === 'result' && last) $('#result').hidden = false; else { resetWorld(); phase = 'title'; $('#title').hidden = false; }
 };
@@ -2081,7 +2093,7 @@ $('#loading').remove();
 applyLang();
 requestAnimationFrame(frame);
 // テスト用
-window.__tk = { makePlan, get phase() { return phase; }, setAngle(a) { angle = a; }, setPower(p) { power = p; }, force(a10, p1000, seed) { startAim(); angle = a10 / 10; doThrowForced(a10, p1000, seed); }, get t() { return tRun; }, get plan() { return plan; }, manual(on) { manual = on; }, step(dt) { stepAll(dt, true); }, ff(sec) { const n = Math.ceil(sec * 30); for (let i = 0; i < n; i++) stepAll(sec / n, false); }, throwNow(a, p, seed) { replayEntry = null; doThrow({ a, p, seed }); }, press() { tb.dispatchEvent(new PointerEvent('pointerdown', { pointerId: 7, clientX: 0, clientY: 0 })); }, aim() { startAim(); }, title() { resetWorld(); phase = 'title'; }, catIds() { return CAT.map(c => c[0]); }, dbg() { const g = gren.G.position, c = camera.position; return [tRun.toFixed(2), g.x.toFixed(2), g.y.toFixed(2), g.z.toFixed(2), '|', c.x.toFixed(1), c.y.toFixed(1), c.z.toFixed(1)].join(' '); } };
+window.__tk = { makePlan, get phase() { return phase; }, setAngle(a) { angle = a; }, setPower(p) { power = p; }, force(a10, p1000, seed) { startAim(); angle = a10 / 10; doThrowForced(a10, p1000, seed); }, get t() { return tRun; }, get plan() { return plan; }, manual(on) { manual = on; }, step(dt) { stepAll(dt, true); }, ff(sec) { const n = Math.ceil(sec * 30); for (let i = 0; i < n; i++) stepAll(sec / n, false); }, throwNow(a, p, seed) { replayEntry = null; doThrow({ a, p, seed }); }, press() { tb.dispatchEvent(new PointerEvent('pointerdown', { pointerId: 7, clientX: 0, clientY: 0 })); }, aim() { startAim(); }, title() { resetWorld(); phase = 'title'; }, catIds() { return CAT.map(c => c[0]); }, causeOf(e) { return cause(e); }, dbg() { const g = gren.G.position, c = camera.position; return [tRun.toFixed(2), g.x.toFixed(2), g.y.toFixed(2), g.z.toFixed(2), '|', c.x.toFixed(1), c.y.toFixed(1), c.z.toFixed(1)].join(' '); } };
 function doThrowForced(a10, p1000, seed) { replayEntry = null; doThrow({ a: a10, p: p1000, seed }); }
 </script>
 </body>
