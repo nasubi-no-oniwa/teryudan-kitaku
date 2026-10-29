@@ -2094,7 +2094,7 @@ $('#send').onclick = async () => {
 $('#share').onclick = () => {
   const url = 'https://nasubi-no-oniwa.github.io/teryudan-kitaku/';
   const body = last && last.kind === 'clear' ? tr('shareC') : tr('shareT', { s: ((last && last.s) / 1000 || 0).toFixed(2), c: cause(last && last.e) });
-  const text = body + '\n#手りゅう弾は帰宅する #gamedev #ゲーム制作\n' + url;
+  const text = body + '\n#手りゅう弾は帰宅する\n' + url;
   open('https://x.com/intent/post?text=' + encodeURIComponent(text), '_blank', 'noopener');
 };
 
