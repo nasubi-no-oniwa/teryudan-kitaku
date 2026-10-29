@@ -281,6 +281,8 @@ const BUB = {
   ko: { ambush: '잠깐 기다려!', kite: '삐요로롱', cat: '냥!', soccer: '헤딩!', volley: '스파이크!', clone: '……', geyser: '푸슈욱', mole: '퉤', scooter: '배달 왔습니다', magnet: '착', bungee: '뾰옹', dog: '멍!', passerby: '떨어뜨리셨어요', batter: '딱!', tennis: '퐁!', keeper: '선방!', golfer: '나이스 샷!', grandma: '이거 네 거니?', sumo: '돗스코이!', ufo: '반품합니다', ufo1: '삐리삐리', plane: '쾅', crow: '까악', wind: '휘이잉', wall: '우르릉', trampoline: '뿅~' },
 };
 function pickLang() {
+  const q = (() => { try { return new URLSearchParams(location.search).get('lang'); } catch (_) { return null; } })();
+  if (q && TX[q]) { lsSet('tk_lang', q); return q; } // なすびのお庭から ?lang=xx で来たら、その言葉で始める
   const saved = (() => { try { return JSON.parse(localStorage.getItem('tk_lang')); } catch (_) { return null; } })();
   if (saved && TX[saved]) return saved;
   const n = (navigator.language || 'ja').toLowerCase();
