@@ -354,6 +354,8 @@ function applyLang() {
 document.querySelectorAll('.langs button').forEach(b => b.onclick = () => { LANG = b.dataset.lang; lsSet('tk_lang', LANG); applyLang(); });
 function lsGet(k) { try { return JSON.parse(localStorage.getItem(k)); } catch (_) { return null; } }
 function lsSet(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (_) { } }
+const FR_AUTH = 'frtk_auth'; // 天下取りマース（別のFirebase）と同じ名前 tk_auth を使っていて鍵を消し合っていたので、名前を分けた（前の鍵は引き継ぐ）
+function authLoad() { let a = lsGet(FR_AUTH); if (!a) { const o = lsGet('tk_auth'); if (o && o.refresh) { a = o; lsSet(FR_AUTH, o); } } return a; }
 
 /* ===================== 投げた結果の計算（再生・検算と共通） ===================== */
 /* ===================== 帰ってくる理由の一覧（型 × 登場するもの） =====================
@@ -2065,16 +2067,16 @@ const FB = { apiKey: 'AIzaSyCMwGPHPKsDByV07QPq56-PGXTDxcYVNfc', databaseURL: 'ht
 const DBP = 'teryudan';
 function dayKey() { return new Date(Date.now() + 9 * 3600e3).toISOString().slice(0, 10).replace(/-/g, ''); }
 async function fbAuth() {
-  let a = lsGet('tk_auth'); if (a && a.exp > Date.now() + 60000) return a;
+  let a = authLoad(); if (a && a.exp > Date.now() + 60000) return a;
   if (a && a.refresh) {
     try {
       const r = await fetch('https://securetoken.googleapis.com/v1/token?key=' + FB.apiKey, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: 'grant_type=refresh_token&refresh_token=' + encodeURIComponent(a.refresh) });
-      if (r.ok) { const j = await r.json(); a = { uid: j.user_id, token: j.id_token, refresh: j.refresh_token, exp: Date.now() + (+j.expires_in) * 1000 }; lsSet('tk_auth', a); return a; }
+      if (r.ok) { const j = await r.json(); a = { uid: j.user_id, token: j.id_token, refresh: j.refresh_token, exp: Date.now() + (+j.expires_in) * 1000 }; lsSet(FR_AUTH, a); return a; }
     } catch (_) { }
   }
   const r = await fetch('https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=' + FB.apiKey, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ returnSecureToken: true }) });
   if (!r.ok) throw new Error('auth');
-  const j = await r.json(); a = { uid: j.localId, token: j.idToken, refresh: j.refreshToken, exp: Date.now() + (+j.expiresIn) * 1000 }; lsSet('tk_auth', a); return a;
+  const j = await r.json(); a = { uid: j.localId, token: j.idToken, refresh: j.refreshToken, exp: Date.now() + (+j.expiresIn) * 1000 }; lsSet(FR_AUTH, a); return a;
 }
 async function fbGet(path, q) { const r = await fetch(FB.databaseURL + '/' + path + '.json' + (q || '')); if (!r.ok) throw new Error('get ' + r.status); return r.json(); }
 async function fbPut(path, val, a) { const r = await fetch(FB.databaseURL + '/' + path + '.json?auth=' + encodeURIComponent(a.token), { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(val) }); if (!r.ok) throw new Error('put ' + r.status); return r.json(); }
@@ -2110,7 +2112,7 @@ async function showRank(kind, from) {
   const ol = $('#rlist'); ol.innerHTML = `<li class="rempty">${esc(tr('rLoading'))}</li>`;
   let r; try { r = await loadRank(kind); } catch (e) { ol.innerHTML = `<li class="rempty">${esc(tr('rFail'))}</li>`; return; }
   if (rankKind !== kind) return;
-  const myId = (lsGet('tk_auth') || {}).uid;
+  const myId = (authLoad() || {}).uid;
   let h = `<li class="top"><span class="no">1</span><span class="nm">${esc(tr('rNoThrow'))}</span><span class="sc">${esc(tr('people', { n: r.nage.toLocaleString() }))}</span><span></span></li>`;
   if (!r.list.length) h += `<li class="rempty">${esc(kind === 'day' ? tr('rEmptyDay') : tr('rEmptyAll'))}</li>`;
   h += r.list.map((e, i) => `<li class="${e.u === myId ? 'me' : ''}"><span class="no">${i + 2}</span><span class="nm">${esc(e.n)}<small>${esc(cause(makePlan(e.a, e.p, e.seed, e.v).e))}</small></span><span class="sc">${(e.s / 1000).toFixed(2)}</span><button class="pl" data-i="${i}" aria-label="${esc(tr('play', { n: e.n }))}">▶</button></li>`).join('');
